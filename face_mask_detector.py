@@ -15,7 +15,7 @@ from packages.utils import parse_arguments
 from packages.utils import training
 from packages.utils import evaluating
 from packages.utils import classifying
-
+from packages.utils import face_detection
 
 def main():
     """
@@ -56,4 +56,5 @@ def main():
 
 
 if __name__ == '__main__':
+    face_detection()
     main()

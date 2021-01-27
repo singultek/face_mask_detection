@@ -10,14 +10,50 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
+# Import the necessary libraries
 import argparse
+import cv2
 
 
-def webcam():
-    return
+def face_detection() -> None:
+    """
+    The method that captures the live image from webcam and classify this input image with pre-trained network
 
+    Args:
 
-def face_detection():
+    Returns:
+        None
+    """
+
+    # Create a capture of webcam (by default 0 is webcam, if external camera will be used, 0 should be changed with 1)
+    cap = cv2.VideoCapture(0)
+    # Load the Haar Cascade filter from opencv module
+    face_cascade_filter = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+
+    # Start the live video
+    while True:
+        # Read the frame
+        _, image = cap.read()
+        # Flip the image for acting like a mirror
+        image = cv2.flip(image, 1, 1)
+        # Convert original image to grayscale
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # Detect the faces with pre-build detectMultiScale method
+        faces = face_cascade_filter.detectMultiScale(gray, 1.3, 4)
+        # Draw the rectangle on each detected face
+        for (x, y, w, h) in faces:
+            cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 2)
+        # Display the findings
+        cv2.imshow('LIVE FACE DETECTION', image)
+        # Live capturing will be stopped when user presses the ESC key
+        if cv2.waitKey(1) == 27:
+            break
+
+    # Release the live capturing video
+    cap.release()
+    # Destroy all the windows
+    cv2.destroyAllWindows()
     return
 
 
