@@ -154,12 +154,22 @@ def training(dataset_path: str,
     Returns:
         None
     """
+
     print(dataset_path, backbone, batch_size, epochs, split_data, learning_rate, number_workers, device)
     return None
 
 
 def evaluating(network_path: str,
                device: str) -> None:
+    """
+    The main evaluating method to perform the evaluation process of the network with input arguments
+    Args:
+        network_path: the string that provides the file path of the saved network
+        device: the string that declares the device used to execute the process
+    Returns:
+        None
+    """
+
     print(network_path, device)
     return None
 
@@ -167,5 +177,15 @@ def evaluating(network_path: str,
 def classifying(input_path: str,
                 network_path: str,
                 device: str) -> None:
+    """
+    The main classifying method to perform the classification process of the network with input arguments
+    Args:
+        input_path: the string that states file path of the input image which will be classified
+        network_path: the string that provides the file path of the saved network
+        device: the string that declares the device used to execute the process
+    Returns:
+        None
+    """
+
     print(input_path, network_path, device)
     return None
