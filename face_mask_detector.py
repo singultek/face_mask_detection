@@ -12,11 +12,48 @@ limitations under the License.
 """
 
 from packages.utils import parse_arguments
+from packages.utils import training
+from packages.utils import evaluating
+from packages.utils import classifying
+
 
 def main():
+    """
+    The main method for executing the working mode given by parsing command line arguments
 
-    parse_arguments()
+    Args:
+
+    Returns:
+        None
+    Raises:
+        RuntimeError If the given working mode is not a member of the following set {train, evaluate, classify}
+    """
+
+    command_line_args = parse_arguments()
+
+    if command_line_args.mode == 'train':
+        print("Training the network is executing!")
+        training(command_line_args.dataset_path,
+                 command_line_args.backbone,
+                 command_line_args.batch_size,
+                 command_line_args.epochs,
+                 command_line_args.split_data,
+                 command_line_args.learning_rate,
+                 command_line_args.number_workers,
+                 command_line_args.device)
+    elif command_line_args.mode == 'evaluate':
+        print("Evaluating the network is executing!")
+        evaluating(command_line_args.network_path,
+                   command_line_args.device)
+    elif command_line_args.mode == 'classify':
+        print("Classifying the input is executing!")
+        classifying(command_line_args.input_path,
+                    command_line_args.network_path,
+                    command_line_args.device)
+    else:
+        raise RuntimeError(
+            "To achieve successful execution, one of the following working mode should be selected; {train, evaluate, classify} ")
+
 
 if __name__ == '__main__':
     main()
-
