@@ -192,7 +192,7 @@ def training(dataset_path: str,
     """
 
     print(dataset_path, backbone, batch_size, epochs, split_data, learning_rate, number_workers, device)
-    return None
+    return
 
 
 def evaluating(network_path: str,
@@ -207,7 +207,7 @@ def evaluating(network_path: str,
     """
 
     print(network_path, device)
-    return None
+    return
 
 
 def classifying(input_path: str,
@@ -224,4 +224,4 @@ def classifying(input_path: str,
     """
 
     print(input_path, network_path, device)
-    return None
+    return
