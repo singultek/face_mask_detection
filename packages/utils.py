@@ -98,6 +98,11 @@ def parse_arguments() -> argparse.Namespace:
                               type=str,
                               choices=['ResNet', 'BasicCNN'],
                               help='(default = ResNet) A neural network which will be used to train')
+    train_parser.add_argument('--resnet_train_mode',
+                              default='not_retrain',
+                              type=str,
+                              choices=['not_retrain', 'retrain'],
+                              help='(default = not_retrain) A retraining mode for ResNet backbone')
     train_parser.add_argument('--batch_size',
                               default=64,
                               type=int,
@@ -170,6 +175,7 @@ def parse_arguments() -> argparse.Namespace:
 
 def training(dataset_path: str,
              backbone: str,
+             resnet_retrain_mode: str,
              batch_size: int,
              epochs: int,
              split_data: list,
@@ -181,6 +187,7 @@ def training(dataset_path: str,
     Args:
         dataset_path: the string with the path of dataset
         backbone: the string with the name of network to be used
+        resnet_retrain_mode: the string that indicates the choice for retraining on the ResNet training mode
         batch_size: the integer which indicates the element processed at each mini-batch
         epochs: the integer which indicates the number of epochs
         split_data: the list with the training and testing proportions of dataset
@@ -191,7 +198,7 @@ def training(dataset_path: str,
         None
     """
 
-    print(dataset_path, backbone, batch_size, epochs, split_data, learning_rate, number_workers, device)
+    print(dataset_path, backbone, resnet_retrain_mode, batch_size, epochs, split_data, learning_rate, number_workers, device)
     return
 
 
