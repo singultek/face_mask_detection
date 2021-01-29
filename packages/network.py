@@ -245,10 +245,10 @@ class CNNClassifier(nn.Module):
     def __loss(logits: torch.Tensor,
                labels: torch.Tensor) -> torch.Tensor:
         """
-        The method which applies the Cross Entropy loss funtion to given logits and laberls.
+        The method which applies the Cross Entropy loss funtion to given logits and labels.
         logits will be used to compute loss function more precisely.
         Args:
-            logits: Output before the activation function.
+            logits: Output before the activation function
             labels: Class labels from dataset
         Returns:
             loss: The value of the loss function
@@ -257,8 +257,25 @@ class CNNClassifier(nn.Module):
         return loss
 
     @staticmethod
-    def __performance(self):
-        return
+    def __performance(outputs: torch.Tensor,
+                      labels: torch.Tensor) -> float:
+        """
+        The method which computes the accuracy of the networks with given outputs and labels.
+        Args:
+            outputs: Output after the activation (softmax) function
+            labels: Class labels from dataset
+        Returns:
+            network_accuracy: The value of the prediction accuracy of the network
+        """
+        # Decisions of CNN Classifier
+        decisions = CNNClassifier.__decision(outputs)
+        # Checking the equality of decisions and labels
+        correct_predictions = torch.eq(decisions, labels)
+        # Converting returns of torch.eq(which is boolean) to torch.float and calculating accuracy
+        # torch.mean gets a tensor as an input and returns one element tensor, which is mean of correct predictions
+        # torch.Tensor.item gets a one element tensor as an input and returns Python float number
+        network_accuracy = torch.mean(correct_predictions.to(torch.float) * 100.00).item()
+        return network_accuracy
 
     def __plot(self):
         return
