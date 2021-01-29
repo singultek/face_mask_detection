@@ -82,33 +82,103 @@ class CNNClassifier(nn.Module):
                 'train': transforms.Compose([
                     transforms.RandomResizedCrop(224, scale=(0.8, 1.2), ratio=(3. / 4., 4. / 3.)),
                     transforms.RandomHorizontalFlip(p=0.5),
+                    transforms.RandomRotation(20),
                     transforms.ToTensor(),
-                    transforms.Normalize(mean=torch.tensor([0.485, 0.456, 0.406]),
-                                         std=torch.tensor([0.229, 0.224, 0.225]))]),
+                    # torchvision.transforms.Normalize converts mean and std to torch.tensor
+                    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                         std=[0.229, 0.224, 0.225])]),
                 'eval': transforms.Compose([
                     transforms.Resize(256),
                     transforms.CenterCrop(224),
                     transforms.ToTensor(),
-                    transforms.Normalize(mean=torch.tensor([0.485, 0.456, 0.406]),
-                                         std=torch.tensor([0.229, 0.224, 0.225]))])
+                    # torchvision.transforms.Normalize converts mean and std to torch.tensor
+                    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                         std=[0.229, 0.224, 0.225])])
             }
 
         elif backbone == "BasicCNN" and backbone is not None:
             # Designed BasicCNN is used
             self.net = nn.Sequential(
-
+                # [3, 256, 256] -> Input with 256*256 RGB Image
+                nn.Conv2d(in_channels=3, out_channels=64, kernel_size=5, stride=1, padding=1),
+                # [64, 252, 252] -> Result of first convolutional layer
+                nn.ReLU(inplace=True),
+                # [64, 252, 252] -> Result of first ReLU activation function
+                nn.MaxPool2d(kernel_size=7, stride=7, padding=0),
+                # [64, 36, 36] -> Result of first max pooling operation
+                nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1),
+                # [128, 36, 36] -> Result of second convolutional layer
+                nn.ReLU(inplace=True),
+                # [128, 36, 36] -> Result of second ReLU activation function
+                nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
+                # [128, 18, 18] -> Result of second max pooling operation
+                nn.Flatten(),
+                # [128*18*18] -> Result of flattening with vector size of 128*18*18
+                nn.Linear(128*18*18, 512),
+                # [512] -> Creating a linear layer with flattened vector size
+                nn.ReLU(inplace=True),
+                # [512] -> Result of ReLU activation function
+                nn.Linear(512, 64),
+                # [64] -> Creating another linear layer. The reason we have 2 steps for converting
+                # flatten layer to linear layer is that we try to decrease dependencies of neurons
+                # and get better classifier
+                nn.ReLU(inplace=True),
+                # [64] -> Result of ReLU activation function
+                nn.Dropout(),
+                # [64] -> Result of Drop-out operation
+                nn.Linear(64, self.number_output)
+                # [self.number_output] -> Final output classes
             )
 
+            # Preprocessing the data for BasicCNN input
+            # While normalization, mean and standard deviation is zero and one
+            self.data_preprocess = {
+                'train': transforms.Compose([
+                    transforms.RandomResizedCrop(256, scale=(0.8, 1.2), ratio=(3. / 4., 4. / 3.)),
+                    transforms.RandomHorizontalFlip(p=0.5),
+                    transforms.RandomRotation(20),
+                    transforms.ToTensor(),
+                    # torchvision.transforms.Normalize converts mean and std to torch.tensor
+                    transforms.Normalize(mean=[0.0, 0.0, 0.0],
+                                         std=[1.0, 1.0, 1.0])]),
+                'eval': transforms.Compose([
+                    transforms.Resize(324),
+                    transforms.CenterCrop(256),
+                    transforms.ToTensor(),
+                    # torchvision.transforms.Normalize converts mean and std to torch.tensor
+                    transforms.Normalize(mean=[0.0, 0.0, 0.0],
+                                         std=[1.0, 1.0, 1.0])])
+            }
         elif backbone is None:
             raise ValueError("The backbone input is not given! Backbone should be selected from {ResNet, BasicCNN}")
         else:
             raise ValueError("The given backbone {} is not recognised".format(str(backbone)))
+
+        # Move network to the selected device's memory
+        self.net.to(self.device)
+
         return
 
-    def save(self):
+    def save_checkpoint(self, epochs, optimizer, loss, file_path) -> None:
+        """
+        Save the network, epochs, optimizer and loss parameters
+        Args:
+            epochs: number of epochs at the moment of saving the network
+            optimizer: optimizer parameters to be saved
+            loss: validation loss to be saved
+            file_path: the path where the file will be saved
+        Returns:
+            None
+        """
+        torch.save({
+            'epoch': epochs,
+            'model_state_dict': self.net.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': loss,
+            }, file_path)
         return
 
-    def load(self):
+    def load_checkpoint(self):
         return
 
     def forward(self):
