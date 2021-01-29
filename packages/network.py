@@ -228,7 +228,29 @@ class CNNClassifier(nn.Module):
         return logits, outputs
 
     @staticmethod
-    def __decision(self):
+    def __decision(outputs: torch.Tensor) -> torch.Tensor:
+        """
+        The method which applies the argmax operation to give the final decisions of classifier.
+        Since argmax is applied, the decision(winnind class ID) will be maximum of the outputs of neurons.
+        Args:
+            outputs: The outputs of Convolutional Neural Network
+        Returns:
+            decisions: The decisions(winning class ID) for each example of dataset
+        """
+        decisions = torch.argmax(outputs, dim=1)
+
+        return decisions
+
+    @staticmethod
+    def __loss(self):
+
+        return
+
+    @staticmethod
+    def __performance(self):
+        return
+
+    def __plot(self):
         return
 
     def train_model(self):
@@ -238,15 +260,4 @@ class CNNClassifier(nn.Module):
         return
 
     def classify_input(self):
-        return
-
-    @staticmethod
-    def __loss(self):
-        return
-
-    @staticmethod
-    def __performance(self):
-        return
-
-    def __plot(self):
         return
