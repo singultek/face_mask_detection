@@ -17,6 +17,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data
 from torchvision import transforms
+import shutil
 
 
 class CNNClassifier(nn.Module):
@@ -114,7 +115,7 @@ class CNNClassifier(nn.Module):
                 # [128, 18, 18] -> Result of second max pooling operation
                 nn.Flatten(),
                 # [128*18*18] -> Result of flattening with vector size of 128*18*18
-                nn.Linear(128*18*18, 512),
+                nn.Linear(128 * 18 * 18, 512),
                 # [512] -> Creating a linear layer with flattened vector size
                 nn.ReLU(inplace=True),
                 # [512] -> Result of ReLU activation function
@@ -159,30 +160,72 @@ class CNNClassifier(nn.Module):
 
         return
 
-    def save_checkpoint(self, epochs, optimizer, loss, file_path) -> None:
+    @staticmethod
+    def save_checkpoint(checkpoint: dict,
+                        network_path: str,
+                        best_network_path: str,
+                        is_best_network: bool) -> None:
         """
-        Save the network, epochs, optimizer and loss parameters
+        Save the checkpoint parameters(network, epochs, optimizer and loss parameters)
         Args:
-            epochs: number of epochs at the moment of saving the network
-            optimizer: optimizer parameters to be saved
-            loss: validation loss to be saved
-            file_path: the path where the file will be saved
+            checkpoint: the dictionary that stores the saved parameters
+            network_path: the current network's file path
+            best_network_path: the best network's file path
+            is_best_network: the boolean variable to indicate whether current network is best or not
         Returns:
             None
         """
-        torch.save({
-            'epoch': epochs,
-            'model_state_dict': self.net.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'loss': loss,
-            }, file_path)
+        # Save the given checkpoint parameters onto given network path
+        torch.save(checkpoint, network_path)
+        # Check the condition of best network
+        if is_best_network:
+            # Modify the best network file with using shutil module
+            shutil.copy(network_path, best_network_path)
+
         return
 
-    def load_checkpoint(self):
-        return
+    def load_checkpoint(self,
+                        saved_network_path: str,
+                        optimizer) -> (nn.Sequential, torch.optim, int, float):
+        """
+        Load the network, epochs, optimizer and loss parameters.
+        To load the items, initialization of network and optimizer is the first thing to do.
+        After that, rest of the parameters can be loaded from checkpoint dictionary.
+        Args:
+            saved_network_path: the path where the loading network file is be saved
+            optimizer: the optimizer for initialization from the checkpoint
+        Returns:
+            self.net: the network that is loaded from saved network file
+            optimizer: the optimizer parameter that is loaded from saved network file
+            epochs: the epoch parameter that is loaded from saved network file
+            loss: loss parameter that is loaded from saved network file
+        """
+        # Load the checkpoint parameters from saved networks path
+        checkpoint = torch.load(saved_network_path)
+        # Initialize the network and optimizer first
+        self.net.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        # Load the other parameters
+        epochs = checkpoint['epoch']
+        loss = checkpoint['loss']
 
-    def forward(self):
-        return
+        return self.net, optimizer, epochs, loss
+
+    def forward(self,
+                x: torch.Tensor) -> (torch.Tensor, torch.Tensor):
+        """
+        The forward stage of Convolutional Neural Network
+        Args:
+            x: Input tensor of Convolutional Neural Network
+        Returns:
+            logits: Output before the activation function. logits will be used to compute loss function more precisely.
+            outputs: Output after the activation function
+        """
+
+        logits = self.net(x)
+        outputs = F.softmax(logits, dim=1)
+
+        return logits, outputs
 
     @staticmethod
     def __decision(self):
