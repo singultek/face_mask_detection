@@ -242,9 +242,19 @@ class CNNClassifier(nn.Module):
         return decisions
 
     @staticmethod
-    def __loss(self):
-
-        return
+    def __loss(logits: torch.Tensor,
+               labels: torch.Tensor) -> torch.Tensor:
+        """
+        The method which applies the Cross Entropy loss funtion to given logits and laberls.
+        logits will be used to compute loss function more precisely.
+        Args:
+            logits: Output before the activation function.
+            labels: Class labels from dataset
+        Returns:
+            loss: The value of the loss function
+        """
+        loss = F.cross_entropy(logits, labels, reduction='mean')
+        return loss
 
     @staticmethod
     def __performance(self):
