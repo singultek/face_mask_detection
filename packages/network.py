@@ -18,6 +18,9 @@ import torch.nn.functional as F
 import torch.utils.data
 from torchvision import transforms
 import shutil
+import matplotlib.pyplot as plt
+import numpy as np
+import os
 
 
 class CNNClassifier(nn.Module):
@@ -277,10 +280,46 @@ class CNNClassifier(nn.Module):
         network_accuracy = torch.mean(correct_predictions.to(torch.float) * 100.00).item()
         return network_accuracy
 
-    def __plot(self):
+    @staticmethod
+    def __plot(network_name: str,
+               train_accuracy: np.array,
+               validation_accuracy: np.array) -> None:
+        """
+        The method that visualize the results of training and validation accuracy
+        Args:
+            network_name: The string that indicates the name of netwrok to save
+            train_accuracy: The array that includes the training accuracies
+            validation_accuracy: The array that includes the validation accuracies
+        Returns:
+            None
+        """
+        # Create the plot for train and validation accuracy results
+        plt.plot(train_accuracy, label='Training Data')
+        plt.plot(validation_accuracy, label='Validation Data')
+        plt.ylabel('Accuracy %')
+        plt.xlabel('Epochs')
+        plt.grid(True)
+        # Splitting the network name for creating title for plot
+        plt.title('Backbone {}, # Batch {}, # Epochs {}, Learning Rate {}'.format(
+            str(network_name.split('-')[0][:-1]),
+            int(network_name.split('-')[1][:-1]),
+            int(network_name.split('-')[2][:-1]),
+            float(network_name.split('-')[3][:-1])))
+        # Declaire the location of legend
+        plt.legend(loc='lower  right')
+
+        # Getting currect script's directory and create a directory for saving the results
+        script_base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        saved_results_dir = os.path.join(script_base_dir, 'results/')
+        # Checking whether there is a forder for results or not
+        if not os.path.isdir(saved_results_dir):
+            os.makedirs(saved_results_dir)
+        # Save the resulted plot as png file
+        plt.savefig("{}.png".format(os.path.join(saved_results_dir, network_name)))
         return
 
     def train_model(self):
+
         return
 
     def eval_model(self):
