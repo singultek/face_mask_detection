@@ -21,6 +21,7 @@ import shutil
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from .dataset import Dataset
 
 
 class CNNClassifier(nn.Module):
@@ -318,12 +319,114 @@ class CNNClassifier(nn.Module):
         plt.savefig("{}.png".format(os.path.join(saved_results_dir, network_name)))
         return
 
-    def train_model(self):
+    def train_network(self, training_set: Dataset,
+                      validation_set: Dataset,
+                      backbone: str,
+                      batch_size: int,
+                      learning_rate: float,
+                      epochs: int) -> None:
+        """
+        The method which computes the training of Convolutional Neural Networks(both ResNet and BasicCNN)
+        Args:
+            training_set: The training split of dataset
+            validation_set: The validaiton split of dataset
+            backbone: The string of network name
+            batch_size: the integer which indicates the element processed at each mini-batch
+            learning_rate: Learning rate for ADAM optimizer
+            epochs: Nuber ıf epochs
+        Returns:
+            None
+        """
+        # Initialize some elements
+        self.net.train()
+        optimizer = torch.optim.Adam(params=filter(lambda p: p.requires_grad, self.net.parameters()), lr=learning_rate)
+        best_val_acc = -1.  # the best accuracy computed on the validation data
+        best_epoch = -1  # the epoch in which the best accuracy above was computed
+        train_acc = np.zeros(epochs)  # The empty array for storing the training accuracy for each epochs
+        val_acc = np.zeros(epochs)  # The empty array for storing the validation accuracy for each epochs
+
+        if not os.path.exists('./models/'):
+            os.makedirs('./models/')
+
+        network_name = '{}-{}-{}-{}'.format(backbone, batch_size, epochs, learning_rate)
+        filepath = '{}.pth'.format(os.path.join('./models/', network_name))
+
+
+        # Looping the each epochs
+        for e in range(0, epochs):
+            print("Training the epoch {} out of {}".format(e+1, epochs))
+
+            # Initializing the training accuracy and loss of current epoch
+            current_epoch_training_accuracy = 0.
+            current_epoch_training_loss = 0.
+            # Initializing the accumuated training examples of current epoch
+            num_current_epoch_training_examples = 0.
+
+            for X,Y in training_set:
+                # Defining the mini-batch size then add it to number of accumuated training examples
+                batch_number_train_example = X.shape[0]
+                num_current_epoch_training_examples += batch_number_train_example
+
+                # Move data to device memory
+                X = X.to(self.device)
+                Y = Y.to(self.device)
+
+                # Computing the outputs and logits
+                logits, outputs = self.forward(X)
+                # Computing the loss
+                loss = CNNClassifier.__loss(logits, Y)
+
+                # Before computing gradients, make all graidients equal to zero
+                optimizer.zero_grad()
+                # Compute the gradients
+                loss.backward()
+                # Update the weşghts with respect to optimizer
+                optimizer.step()
+
+                # Compute the performance of network on the mini-batch
+                # Since we will evaluate the performance, we need to switch off autograd
+                with torch.no_grad():
+                    # Turning on evaluation mode on
+                    self.net.eval()
+
+                    # Compute the performance and accumulate the accuracy and loss
+                    batch_training_accuracy = CNNClassifier.__performance(outputs, Y)
+                    current_epoch_training_accuracy += batch_training_accuracy * batch_number_train_example
+                    current_epoch_training_loss += loss.item() * batch_number_train_example
+
+                    # Turning on the training mode again
+                    self.net.train()
+
+                    print("mini-batch:\tloss={0:.4f}, training_acc={1:.2f}".format(loss.item(), batch_training_accuracy))
+            validation_accuracy = self.eval_network(validation_set)
+
+            if validation_accuracy > best_val_acc:
+                best_val_acc = validation_accuracy
+                best_epoch = e + 1
+                self.save(filepath)
+
+            current_epoch_training_accuracy /= num_current_epoch_training_examples
+            train_acc[e] = current_epoch_training_accuracy
+            val_acc[e] = validation_accuracy
+            current_epoch_training_loss /= num_current_epoch_training_examples
+
+            print(("loss={:.4f} - training_acc={:.4f} - validation_acc={:.4f}"
+                   + (" - BEST!" if best_epoch == e + 1 else ""))
+                  .format(current_epoch_training_loss, current_epoch_training_accuracy,
+                          validation_accuracy))
+
+        self.__plot(network_name, train_acc, val_acc)
+
+
+
+
+
+
 
         return
 
-    def eval_model(self):
-        return
+    def eval_network(self, dataset: Dataset):
+        return accuracy
 
     def classify_input(self):
         return
