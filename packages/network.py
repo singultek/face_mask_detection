@@ -351,10 +351,9 @@ class CNNClassifier(nn.Module):
         network_name = '{}-{}-{}-{}'.format(backbone, batch_size, epochs, learning_rate)
         filepath = '{}.pth'.format(os.path.join('./models/', network_name))
 
-
         # Looping the each epochs
         for e in range(0, epochs):
-            print("Training the epoch {} out of {}".format(e+1, epochs))
+            print("Training the epoch {} out of {}".format(e + 1, epochs))
 
             # Initializing the training accuracy and loss of current epoch
             current_epoch_training_accuracy = 0.
@@ -362,7 +361,7 @@ class CNNClassifier(nn.Module):
             # Initializing the accumuated training examples of current epoch
             num_current_epoch_training_examples = 0.
 
-            for X,Y in training_set:
+            for X, Y in training_set:
                 # Defining the mini-batch size then add it to number of accumuated training examples
                 batch_number_train_example = X.shape[0]
                 num_current_epoch_training_examples += batch_number_train_example
@@ -397,9 +396,13 @@ class CNNClassifier(nn.Module):
                     # Turning on the training mode again
                     self.net.train()
 
-                    print("mini-batch:\tloss={0:.4f}, training_acc={1:.2f}".format(loss.item(), batch_training_accuracy))
+                    print(
+                        "mini-batch:\tloss={0:.4f}, training_acc={1:.2f}".format(loss.item(), batch_training_accuracy))
+
+            # Compute the validation accuracy
             validation_accuracy = self.eval_network(validation_set)
 
+            # Save the network if validation accuracy is best so far
             if validation_accuracy > best_val_acc:
                 best_val_acc = validation_accuracy
                 best_epoch = e + 1
@@ -416,17 +419,45 @@ class CNNClassifier(nn.Module):
                           validation_accuracy))
 
         self.__plot(network_name, train_acc, val_acc)
-
-
-
-
-
-
-
         return
 
-    def eval_network(self, dataset: Dataset):
-        return accuracy
+    def eval_network(self,
+                     dataset: Dataset) -> float:
+        """
+        The method which computes the evaluation of Convolutional Neural Networks(both ResNet and BasicCNN)
+        Args:
+            dataset: The given dataset to validate
+        Returns:
+            accuracy
+        """
+        # Initialize the training mode to eval if it has not set as eval already
+        if self.net.training:
+            self.net.eval()
+
+        # Initialize the lists for storing the mini-batch outputs
+        minibatch_output = []
+        minibatch_labels = []
+
+        # Since we will evaluate the performance, we need to switch off autograd
+        with torch.no_grad():
+
+            # Looping over mini-batches to accumuate outputs
+            for _, (X, Y) in enumerate(dataset):
+                X = X.to(self.device)
+
+                _, outputs = self.forward(X)
+                # Append operation is forced to accomplish with cpu device
+                minibatch_output.append(outputs.cpu())
+                minibatch_labels.append(Y)
+
+            # Computing the performance
+
+            network_accuracy = CNNClassifier.__performance(torch.cat(minibatch_output, dim=0),
+                                                           torch.cat(minibatch_labels, dim=0))
+        # Switch back to training mode if needed
+        if self.net.training:
+            self.net.train()
+        return network_accuracy
 
     def classify_input(self):
         return
