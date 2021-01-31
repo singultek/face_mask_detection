@@ -459,4 +459,4 @@ class CNNClassifier(nn.Module):
         # Switch back to training mode if needed
         if self.net.training:
             self.net.train()
-        return CNNClassifier.__decision(torch.FloatTensor(outputs))
+        return CNNClassifier.__decision(outputs)

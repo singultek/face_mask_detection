@@ -198,6 +198,7 @@ def training(dataset_path: str,
         None
     """
 
+
     print(dataset_path, backbone, resnet_retrain_mode, batch_size, epochs, split_data, learning_rate, number_workers, device)
     return
 
