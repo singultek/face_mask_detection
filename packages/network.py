@@ -17,7 +17,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data
 from torchvision import transforms
-import shutil
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -164,7 +163,6 @@ class CNNClassifier(nn.Module):
 
         return
 
-    @staticmethod
     def save(self,
              network_path: str) -> None:
         """
@@ -384,7 +382,7 @@ class CNNClassifier(nn.Module):
             if validation_accuracy > best_val_acc:
                 best_val_acc = validation_accuracy
                 best_epoch = e + 1
-                self.save(filepath)
+                self.save(network_path=filepath)
 
             current_epoch_training_accuracy /= num_current_epoch_training_examples
             train_acc[e] = current_epoch_training_accuracy
