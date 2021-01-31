@@ -165,55 +165,33 @@ class CNNClassifier(nn.Module):
         return
 
     @staticmethod
-    def save_checkpoint(checkpoint: dict,
-                        network_path: str,
-                        best_network_path: str,
-                        is_best_network: bool) -> None:
+    def save(self,
+             network_path: str) -> None:
         """
-        Save the checkpoint parameters(network, epochs, optimizer and loss parameters)
+        Save the network parameters
         Args:
-            checkpoint: the dictionary that stores the saved parameters
             network_path: the current network's file path
-            best_network_path: the best network's file path
-            is_best_network: the boolean variable to indicate whether current network is best or not
         Returns:
             None
         """
-        # Save the given checkpoint parameters onto given network path
-        torch.save(checkpoint, network_path)
-        # Check the condition of best network
-        if is_best_network:
-            # Modify the best network file with using shutil module
-            shutil.copy(network_path, best_network_path)
-
+        # Save the network parameters onto given network path
+        torch.save(self.net.state_dict(), network_path)
         return
 
-    def load_checkpoint(self,
-                        saved_network_path: str,
-                        optimizer) -> (nn.Sequential, torch.optim, int, float):
+    def load(self,
+             saved_network_path: str) -> None:
         """
-        Load the network, epochs, optimizer and loss parameters.
-        To load the items, initialization of network and optimizer is the first thing to do.
-        After that, rest of the parameters can be loaded from checkpoint dictionary.
+        Load the network
         Args:
             saved_network_path: the path where the loading network file is be saved
-            optimizer: the optimizer for initialization from the checkpoint
         Returns:
-            self.net: the network that is loaded from saved network file
-            optimizer: the optimizer parameter that is loaded from saved network file
-            epochs: the epoch parameter that is loaded from saved network file
-            loss: loss parameter that is loaded from saved network file
+            None
         """
         # Load the checkpoint parameters from saved networks path
-        checkpoint = torch.load(saved_network_path)
-        # Initialize the network and optimizer first
-        self.net.load_state_dict(checkpoint['model_state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        # Load the other parameters
-        epochs = checkpoint['epoch']
-        loss = checkpoint['loss']
+        self.net.load_state_dict(torch.load(saved_network_path, map_location=self.device))
+        self.net.to(self.device)
 
-        return self.net, optimizer, epochs, loss
+        return
 
     def forward(self,
                 x: torch.Tensor) -> (torch.Tensor, torch.Tensor):
@@ -459,5 +437,26 @@ class CNNClassifier(nn.Module):
             self.net.train()
         return network_accuracy
 
-    def classify_input(self):
-        return
+    def classify_input(self,
+                       input_image: torch.Tensor) -> torch.Tensor:
+        """
+        The method which classifies the given input image
+        Args:
+            input_image: The input image in type of torch.Tensor
+        Returns:
+            torch.Tensor which stores the decision information
+        """
+        # Initialize the training mode to eval if it has not set as eval already
+        if self.net.training:
+            self.net.eval()
+
+        # Since we will classify the input image, we need to switch off autograd
+        with torch.no_grad():
+
+            input_image.to(self.device)
+            _, outputs = self.forward(input_image)
+
+        # Switch back to training mode if needed
+        if self.net.training:
+            self.net.train()
+        return CNNClassifier.__decision(torch.FloatTensor(outputs))
