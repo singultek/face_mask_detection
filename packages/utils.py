@@ -112,8 +112,8 @@ def parse_arguments() -> argparse.Namespace:
                               type=int,
                               help='(default = 10) The number of training epochs')
     train_parser.add_argument('--split_data',
-                              nargs=2,
-                              default=[0.8, 0.2],
+                              nargs=3,
+                              default=[0.7, 0.15, 0.15],
                               type=str,
                               help='(default = [0.8,0.2]) The dataset proportions for training process')
     train_parser.add_argument('--learning_rate',
@@ -161,11 +161,10 @@ def parse_arguments() -> argparse.Namespace:
             try:
                 split_sum += float(element)
             except ValueError:
-                raise ValueError("Invalid dataset split input. Please try to use proper format, like 0.8 0.2")
+                raise ValueError("Invalid dataset split input. Please try to use proper format, like 0.7 0.15 0.15")
 
         if split_sum != 1.0:
-            raise ValueError(
-                "Invalid dataset split input. The sum of proportions of split should be exactly 1.0, like 0.8 0.2")
+            raise ValueError("Invalid dataset split input. The sum of proportions of split should be exactly 1.0, like 0.7 0.15 0.15")
     # There is no split_data attribute belongs to Namespace when we don't use training mode. Thus, we will except AttributeError but we can just pass that.
     except AttributeError:
         pass
