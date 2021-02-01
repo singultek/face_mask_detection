@@ -15,17 +15,18 @@ limitations under the License.
 import argparse
 import cv2
 
+from .network import *
+from .dataset import *
+
 
 def face_detection() -> None:
     """
     The method that captures the live image from webcam and classify this input image with pre-trained network
-
     Args:
 
     Returns:
         None
     """
-
     # Create a capture of webcam (by default 0 is webcam, if external camera will be used, 0 should be changed with 1)
     cap = cv2.VideoCapture(0)
     # Load the Haar Cascade filter from opencv module
@@ -128,15 +129,44 @@ def parse_arguments() -> argparse.Namespace:
                               default='cpu',
                               type=str,
                               help='(default = cpu) The device which will be used to compute the neural network {cpu, cuda:0, cuda:1, ...}')
+    train_parser.add_argument('--shuffle',
+                              default=True,
+                              type=bool,
+                              help='(default = True) The boolean value which indicates whether data will be randomly shuffled or not')
 
     # Adding parsers for evaluate mode
     evaluate_parser.add_argument('network_path',
                                  type=str,
                                  help='A network file path to evaluate')
+    evaluate_parser.add_argument('dataset_path',
+                                 type=str,
+                                 help='A dataset folder to evaluate')
+    evaluate_parser.add_argument('--backbone',
+                                 default='ResNet',
+                                 type=str,
+                                 choices=['ResNet', 'BasicCNN'],
+                                 help='(default = ResNet) A neural network which will be used to evaluate')
+    evaluate_parser.add_argument('--resnet_train_mode',
+                                 default='not_retrain',
+                                 type=str,
+                                 choices=['not_retrain', 'retrain'],
+                                 help='(default = not_retrain) A retraining mode for ResNet backbone')
+    evaluate_parser.add_argument('--batch_size',
+                                 default=64,
+                                 type=int,
+                                 help='(default = 64) The size of mini-batch')
+    evaluate_parser.add_argument('--number_workers',
+                                 default=3,
+                                 type=int,
+                                 help='(default = 3) The number of unit which will work during loading data stage')
     evaluate_parser.add_argument('--device',
                                  default='cpu',
                                  type=str,
                                  help='(default = cpu) The device which will be used to compute the neural network {cpu, cuda:0, cuda:1, ...}')
+    evaluate_parser.add_argument('--shuffle',
+                                 default=False,
+                                 type=bool,
+                                 help='(default = True) The boolean value which indicates whether data will be randomly shuffled or not')
 
     # Adding parsers for classify mode
     classify_parser.add_argument('input_path',
@@ -164,7 +194,8 @@ def parse_arguments() -> argparse.Namespace:
                 raise ValueError("Invalid dataset split input. Please try to use proper format, like 0.7 0.15 0.15")
 
         if split_sum != 1.0:
-            raise ValueError("Invalid dataset split input. The sum of proportions of split should be exactly 1.0, like 0.7 0.15 0.15")
+            raise ValueError(
+                "Invalid dataset split input. The sum of proportions of split should be exactly 1.0, like 0.7 0.15 0.15")
     # There is no split_data attribute belongs to Namespace when we don't use training mode. Thus, we will except AttributeError but we can just pass that.
     except AttributeError:
         pass
@@ -180,7 +211,8 @@ def training(dataset_path: str,
              split_data: list,
              learning_rate: float,
              number_workers: int,
-             device: str) -> None:
+             device: str,
+             shuffle: bool) -> None:
     """
     The main training method to perform the training process of the network with input arguments
     Args:
@@ -193,27 +225,82 @@ def training(dataset_path: str,
         learning_rate: the float that indicates the learning rate of ADAM
         number_workers: the integer that gives the number of working unit while loading data
         device: the string that declares the device used to execute the process
+        shuffle: The boolean value which indicates whether data will be randomly shuffled or not
+
     Returns:
         None
     """
-
-
-    print(dataset_path, backbone, resnet_retrain_mode, batch_size, epochs, split_data, learning_rate, number_workers, device)
+    # Creating a new classifier
+    classifier = CNNClassifier(backbone, resnet_retrain_mode, device)
+    # Dataset preperation
+    dataset = Dataset(dataset_path)
+    # Dataset splits
+    [train_set, val_set, test_set] = dataset.split_into_test_train(split_data)
+    # Defining data preprocess operations
+    train_set.preprocess_operation(classifier.data_preprocess['train'])
+    val_set.preprocess_operation(classifier.data_preprocess['eval'])
+    test_set.preprocess_operation(classifier.data_preprocess['eval'])
+    # Converting datasets into data loaders
+    train_set.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
+    val_set.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
+    test_set.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
+    # Print some inside information of the data
+    dataset.summary_data_characteristics([train_set, val_set, test_set], split_data)
+    # Train the classifier
+    print('\nTraining stage has started..\n')
+    classifier.train_network(train_set, val_set, backbone, batch_size, learning_rate, epochs)
+    # Load the best resulted model for validation
+    print('\nLoading the best model found during trainig..\n')
+    network_name = '{}-{}-{}-{}'.format(backbone, batch_size, epochs, learning_rate)
+    filepath = '{}.pth'.format(os.path.join('./models/', network_name))
+    classifier.load(saved_network_path=filepath)
+    print('\nValidation stage has started..\n')
+    train_acc = classifier.eval_network(train_set)
+    val_acc = classifier.eval_network(val_set)
+    test_acc = classifier.eval_network(test_set)
+    print('\nAccuracies of {} in the {}\n'.format(network_name, filepath))
+    print('Training set:\t{}'.format(round(train_acc, 4)))
+    print('Validation set:\t{}'.format(round(val_acc, 4)))
+    print('Test set:\t{}'.format(round(test_acc, 4)))
     return
 
 
 def evaluating(network_path: str,
-               device: str) -> None:
+               dataset_path: str,
+               backbone: str,
+               resnet_retrain_mode: str,
+               batch_size: int,
+               number_workers: int,
+               device: str,
+               shuffle: bool) -> None:
     """
     The main evaluating method to perform the evaluation process of the network with input arguments
     Args:
         network_path: the string that provides the file path of the saved network
+        dataset_path: the string with the path of dataset
+        backbone: the string with the name of network to be used
+        resnet_retrain_mode: the string that indicates the choice for retraining on the ResNet training mode
+        batch_size: the integer which indicates the element processed at each mini-batch
+        number_workers: the integer that gives the number of working unit while loading data
         device: the string that declares the device used to execute the process
+        shuffle: The boolean value which indicates whether data will be randomly shuffled or not
     Returns:
         None
     """
+    # Creating a new classifier
+    classifier = CNNClassifier(backbone, resnet_retrain_mode, device)
+    # Dataset preperation
+    dataset = Dataset(dataset_path)
+    # Defining data preprocess operations
+    dataset.preprocess_operation(classifier.data_preprocess['eval'])
+    # Converting datasets into data loaders
+    dataset.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
 
-    print(network_path, device)
+    print('\nLoading the model to evaluate..\n')
+    classifier.load(saved_network_path=network_path)
+    print('\nValidation stage has started..\n')
+    acc = classifier.eval_network(dataset)
+    print('\nAccuracy: {} of the network in the {}\n'.format(round(acc, 4), network_path))
     return
 
 
