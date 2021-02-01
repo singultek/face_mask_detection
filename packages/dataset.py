@@ -225,4 +225,3 @@ class Dataset(torch.utils.data.Dataset):
             print('The class:   {}( encoded as {} )   ->  {} samples'.format(self.output_classes[i], i, len(self.splitted_datasets_each_class[i])))
             print('The data distributions with respect to labels of classes {}'.format(round(float(len(self.splitted_datasets_each_class[i])/len(self.files)), 3)))
         return
-
