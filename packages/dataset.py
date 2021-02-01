@@ -185,8 +185,26 @@ class Dataset(torch.utils.data.Dataset):
                 start = end
         return splitted_datasets
 
-    def data_loader(self):
-        return
+    def data_loader(self,
+                    batch_size: int = 64,
+                    shuffle: bool = True,
+                    number_workers: int = 3) -> torch.utils.data.DataLoader:
+        """
+        The method that convert datasets into data loaders with the help of torch.utils.data module
+        Args:
+            batch_size: (default=64) The integer which indicates the element processed at each mini-batch
+            shuffle: (default=True) The boolean value that states whether dataset will be shuffled or not
+            number_workers: (default=3) The integer that gives the number of working unit while loading data
+        Returns:
+            dataloader: The converted data loader which will provide data iteratively
+        """
+        if len(self.files) == 0 or len(self.labels) == 0:
+            raise RuntimeError('Converting to data loaders operation cannot perfrom on empty dataset lists')
+        dataloader = torch.utils.data.DataLoader(self,
+                                                 batch_size=batch_size,
+                                                 shuffle=shuffle,
+                                                 num_workers=number_workers)
+        return dataloader
 
     def summary_data_characteristics(self):
         return
