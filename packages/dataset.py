@@ -102,7 +102,7 @@ class Dataset(torch.utils.data.Dataset):
     def __getitem__(self,
                     index: int) -> tuple:
         """
-        The method which gets the indexof item from dataset and givens the tuple of image and label of that image
+        The method which gets the index of item from dataset and givens the tuple of image and label of that image
         Args:
             index: index of item from dataset
         Returns:
@@ -122,6 +122,7 @@ class Dataset(torch.utils.data.Dataset):
     def preprocess_operation(self,
                              preprocess_operation: transforms or transforms.Compose or nn.Sequential) -> None:
         """
+        The method that performs data preprocessing into each dataset samples
         Args:
             preprocess_operation: The preprocess operation to apply each input image
         Returns:
@@ -130,8 +131,59 @@ class Dataset(torch.utils.data.Dataset):
         self.preprocess = preprocess_operation
         return
 
-    def split_into_test_train(self):
-        return
+    def split_into_test_train(self,
+                              proportions: list) -> list:
+        """
+        The method which splits the dataset into given proortions
+        Args:
+            proportions: The proportion of dataset splits Example = [0.8, 0.2]
+        Returns:
+            splitted_datasets
+        """
+        # Firstly, check the given proportion input is valid or not
+        if len(proportions) == 0 and not sum(proportions) == 1:
+            raise ValueError('Invalid proportion is given, their lenght must be non 0 and sum must be 1')
+        else:
+            for prop in proportions:
+                if prop <= 0.0:
+                    raise ValueError('Invalid proportions is given, each portion must be greater than 0')
+        # Then check the files and labels
+        if len(self.files) == 0 or len(self.labels) == 0:
+            raise RuntimeError('Split operation cannot perfrom on empty dataset lists')
+
+        # Getting number of splits
+        number_splits = len(proportions)
+        # Creating empty list and dictionary for splitted dataset
+        splitted_datasets = []
+        splitted_datasets_each_class = {}
+        # Adding empty list into each key value in the dictionary
+        for classes in range(0, self.number_class):
+            splitted_datasets_each_class[classes] = []
+        # Adding image file from self.files to dictionary with respect to its label
+        # Example: dictionary key: label and dictionary value: image file
+        for image_file in range(0, len(self.files)):
+            splitted_datasets_each_class[self.labels[image_file]].append(image_file)
+        # Creating Dataset object for each split
+        for i in range(0, number_splits):
+            splitted_datasets.append(Dataset(self.data_path, empty_dataset=True))
+
+        # Splitting dataset
+        for class_j in range(0, self.number_class):
+            # Index of considered element starts from 0
+            start = 0
+            for current_split in range(0, number_splits):
+                # Calculating number of element for each class 'class_j'
+                n = int(proportions[current_split] * len(splitted_datasets_each_class[class_j]))
+                # Index of considered element end with following conditions
+                end = start + n if current_split < number_splits - 1 else len(splitted_datasets_each_class[class_j])
+                # Looping over indices to considered at each iteration
+                for ids in splitted_datasets_each_class[class_j][start:end]:
+                    # Appending the selected data and its label to the current split on Dataset object
+                    splitted_datasets[current_split].files.append(self.files[ids])
+                    splitted_datasets[current_split].labels.append(self.labels[ids])
+                # Updating starting index for next iteration
+                start = end
+        return splitted_datasets
 
     def data_loader(self):
         return
