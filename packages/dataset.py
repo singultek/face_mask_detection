@@ -20,6 +20,7 @@ from torchvision import transforms
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from PIL import Image
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -87,19 +88,46 @@ class Dataset(torch.utils.data.Dataset):
                 counter += 1
         return
 
-    def __len__(self):
-        return
+    def __len__(self) -> int:
+        """
+        The method which gives the lenght of dataset
+        Args:
+            None
+        Returns:
+            lenght of dataset
 
-    def __getitem__(self, item):
-        return
+        """
+        return len(self.files)
 
-    def save(self):
-        return
+    def __getitem__(self,
+                    index: int) -> tuple:
+        """
+        The method which gets the indexof item from dataset and givens the tuple of image and label of that image
+        Args:
+            index: index of item from dataset
+        Returns:
+            image, label: The tuple pair of image and label of image
+        """
+        # Load the image using PIL
+        image = Image.open(self.files[index]).convert('RGB')
 
-    def load(self):
-        return
+        # Apply the preprocessing operation if it is needed
+        if self.preprocess is not None:
+            image = self.preprocess(image)  # preprocessing image
 
-    def preprocess_operation(self):
+        # Get the label in type of torch.tensor
+        label = torch.tensor(self.labels[index], dtype=torch.long)
+        return image, label
+
+    def preprocess_operation(self,
+                             preprocess_operation: transforms or transforms.Compose or nn.Sequential) -> None:
+        """
+        Args:
+            preprocess_operation: The preprocess operation to apply each input image
+        Returns:
+            None
+        """
+        self.preprocess = preprocess_operation
         return
 
     def split_into_test_train(self):
