@@ -14,11 +14,8 @@ limitations under the License.
 # Importing necessary libraries
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.utils.data
 from torchvision import transforms
-import matplotlib.pyplot as plt
-import numpy as np
 import os
 from PIL import Image
 
@@ -61,17 +58,17 @@ class Dataset(torch.utils.data.Dataset):
 
         # Getting the number of output classes
         folders = os.listdir(self.data_path)
-        output_classes = [folder for folder in folders if os.path.isdir(os.path.join(self.data_path, folder))
-                          and not folder.endswith('.')]
-        output_classes = sorted(output_classes)
-        self.number_class = len(output_classes)
+        self.output_classes = [folder for folder in folders if os.path.isdir(os.path.join(self.data_path, folder))
+                               and not folder.endswith('.')]
+        self.output_classes = sorted(self.output_classes)
+        self.number_class = len(self.output_classes)
 
         # If we have empty_dataset= False, we will load the file names and labes into
         # files and labels empty lists
         if not empty_dataset:
             counter = 0
             # Looping over each output classes
-            for each_output_classes in output_classes:
+            for each_output_classes in self.output_classes:
                 # For each output classes, we create file path
                 output_classes_folder = os.path.join(self.data_path, each_output_classes)
                 # For each created file path, we get the list of image files
@@ -155,14 +152,14 @@ class Dataset(torch.utils.data.Dataset):
         number_splits = len(proportions)
         # Creating empty list and dictionary for splitted dataset
         splitted_datasets = []
-        splitted_datasets_each_class = {}
+        self.splitted_datasets_each_class = {}
         # Adding empty list into each key value in the dictionary
         for classes in range(0, self.number_class):
-            splitted_datasets_each_class[classes] = []
+            self.splitted_datasets_each_class[classes] = []
         # Adding image file from self.files to dictionary with respect to its label
         # Example: dictionary key: label and dictionary value: image file
         for image_file in range(0, len(self.files)):
-            splitted_datasets_each_class[self.labels[image_file]].append(image_file)
+            self.splitted_datasets_each_class[self.labels[image_file]].append(image_file)
         # Creating Dataset object for each split
         for i in range(0, number_splits):
             splitted_datasets.append(Dataset(self.data_path, empty_dataset=True))
@@ -173,11 +170,11 @@ class Dataset(torch.utils.data.Dataset):
             start = 0
             for current_split in range(0, number_splits):
                 # Calculating number of element for each class 'class_j'
-                n = int(proportions[current_split] * len(splitted_datasets_each_class[class_j]))
+                n = int(proportions[current_split] * len(self.splitted_datasets_each_class[class_j]))
                 # Index of considered element end with following conditions
-                end = start + n if current_split < number_splits - 1 else len(splitted_datasets_each_class[class_j])
+                end = start + n if current_split < number_splits - 1 else len(self.splitted_datasets_each_class[class_j])
                 # Looping over indices to considered at each iteration
-                for ids in splitted_datasets_each_class[class_j][start:end]:
+                for ids in self.splitted_datasets_each_class[class_j][start:end]:
                     # Appending the selected data and its label to the current split on Dataset object
                     splitted_datasets[current_split].files.append(self.files[ids])
                     splitted_datasets[current_split].labels.append(self.labels[ids])
@@ -206,5 +203,26 @@ class Dataset(torch.utils.data.Dataset):
                                                  num_workers=number_workers)
         return dataloader
 
-    def summary_data_characteristics(self):
+    def summary_data_characteristics(self,
+                                     input_dataset: list,
+                                     proportions: list) -> None:
+        """
+        The method for printing basic characteristics of dataset
+        Args:
+            input_dataset: The list that consists of Dataset objects
+            proportions: The proportions that is used to split dataset
+        Returns:
+            None
+        """
+        print('The number of samples:\t{}'.format(len(self.files)))
+        print('The labels of classes are {}'.format(self.output_classes))
+        print('After splitting dataset with respect to train set: {}, '
+              'validation set: {}, test set: {}'.format(proportions[0], proportions[1], proportions[2]))
+        print('The dataset proportions has type for train set:{},'
+              'validation set: {}, test set: {}'.format(type(input_dataset[0]), type(input_dataset[1]), type(input_dataset[2])))
+
+        for i in range(self.number_class):
+            print('The class:   {}( encoded as {} )   ->  {} samples'.format(self.output_classes[i], i, len(self.splitted_datasets_each_class[i])))
+            print('The data distributions with respect to labels of classes {}'.format(round(float(len(self.splitted_datasets_each_class[i])/len(self.files)), 3)))
         return
+
