@@ -35,16 +35,24 @@ def main():
         print("Training the network is executing!")
         training(command_line_args.dataset_path,
                  command_line_args.backbone,
+                 command_line_args.resnet_train_mode,
                  command_line_args.batch_size,
                  command_line_args.epochs,
                  command_line_args.split_data,
                  command_line_args.learning_rate,
                  command_line_args.number_workers,
-                 command_line_args.device)
+                 command_line_args.device,
+                 command_line_args.shuffle)
     elif command_line_args.mode == 'evaluate':
         print("Evaluating the network is executing!")
         evaluating(command_line_args.network_path,
-                   command_line_args.device)
+                   command_line_args.dataset_path,
+                   command_line_args.backbone,
+                   command_line_args.resnet_retrain_mode,
+                   command_line_args.batch_size,
+                   command_line_args.number_workers,
+                   command_line_args.device,
+                   command_line_args.shuffle)
     elif command_line_args.mode == 'classify':
         print("Classifying the input is executing!")
         classifying(command_line_args.input_path,
