@@ -17,7 +17,6 @@ import cv2
 
 from .network import *
 from .dataset import *
-import torch.utils.data
 
 
 def face_detection() -> None:
@@ -100,7 +99,7 @@ def parse_arguments() -> argparse.Namespace:
                               type=str,
                               choices=['ResNet', 'BasicCNN'],
                               help='(default = ResNet) A neural network which will be used to train')
-    train_parser.add_argument('--resnet_train_mode',
+    train_parser.add_argument('--resnet_retrain_mode',
                               default='not_retrain',
                               type=str,
                               choices=['not_retrain', 'retrain'],
@@ -147,7 +146,7 @@ def parse_arguments() -> argparse.Namespace:
                                  type=str,
                                  choices=['ResNet', 'BasicCNN'],
                                  help='(default = ResNet) A neural network which will be used to evaluate')
-    evaluate_parser.add_argument('--resnet_train_mode',
+    evaluate_parser.add_argument('--resnet_retrain_mode',
                                  default='not_retrain',
                                  type=str,
                                  choices=['not_retrain', 'retrain'],
@@ -252,7 +251,7 @@ def training(dataset_path: str,
     classifier.train_network(train_set, val_set, backbone, resnet_retrain_mode, batch_size, learning_rate, epochs)
     # Load the best resulted model for validation
     print('\nLoading the best model found during trainig..\n')
-    network_name = '{}({})-{}-{}-{}'.format(backbone, resnet_retrain_mode, batch_size, epochs, learning_rate)
+    network_name = '{}-{}-{}-{}-{}'.format(backbone, resnet_retrain_mode, batch_size, epochs, learning_rate)
     filepath = '{}.pth'.format(os.path.join('./models/', network_name))
     classifier.load(saved_network_path=filepath)
     print('\nValidation stage has started..\n')

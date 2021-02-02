@@ -277,11 +277,12 @@ class CNNClassifier(nn.Module):
         plt.xlabel('Epochs')
         plt.grid(True)
         # Splitting the network name for creating title for plot
-        plt.title('Backbone {}, # Batch {}, # Epochs {}, Learning Rate {}'.format(
+        plt.title('Backbone {}-{}, # Batch {}, # Epochs {}, Learning Rate {}'.format(
             str(network_name.split('-')[0]),
-            int(network_name.split('-')[1]),
+            str(network_name.split('-')[1]),
             int(network_name.split('-')[2]),
-            float(network_name.split('-')[3])))
+            int(network_name.split('-')[3]),
+            float(network_name.split('-')[4])))
         # Declaire the location of legend
         plt.legend(loc='lower right')
 
@@ -326,7 +327,7 @@ class CNNClassifier(nn.Module):
         if not os.path.exists('./models/'):
             os.makedirs('./models/')
 
-        network_name = '{}({})-{}-{}-{}'.format(backbone, resnet_retrain_mode, batch_size, epochs, learning_rate)
+        network_name = '{}-{}-{}-{}-{}'.format(backbone, resnet_retrain_mode, batch_size, epochs, learning_rate)
         filepath = '{}.pth'.format(os.path.join('./models/', network_name))
 
         # Looping the each epochs
@@ -374,8 +375,7 @@ class CNNClassifier(nn.Module):
                     # Turning on the training mode again
                     self.net.train()
 
-                    print(
-                        "mini-batch:\tloss={0:.4f}, training_acc={1:.2f}".format(loss.item(), batch_training_accuracy))
+                    print("mini-batch:\tloss={0:.4f}, training_acc={1:.2f}".format(loss.item(), batch_training_accuracy))
 
             # Compute the validation accuracy
             validation_accuracy = self.eval_network(validation_set)

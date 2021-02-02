@@ -35,7 +35,7 @@ def main():
         print("Training the network is executing!")
         training(command_line_args.dataset_path,
                  command_line_args.backbone,
-                 command_line_args.resnet_train_mode,
+                 command_line_args.resnet_retrain_mode,
                  command_line_args.batch_size,
                  command_line_args.epochs,
                  command_line_args.split_data,
