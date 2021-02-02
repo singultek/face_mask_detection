@@ -20,7 +20,6 @@ from torchvision import transforms
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from .dataset import Dataset
 
 
 class CNNClassifier(nn.Module):
