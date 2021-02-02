@@ -102,35 +102,35 @@ class CNNClassifier(nn.Module):
         elif backbone == "BasicCNN" and backbone is not None:
             # Designed BasicCNN is used
             self.net = nn.Sequential(
-                # [3, 256, 256] -> Input with 256*256 RGB Image
+                # [batch_size, 3, 256, 256] -> Input with 256*256 RGB Image
                 nn.Conv2d(in_channels=3, out_channels=64, kernel_size=5, stride=1, padding=1),
-                # [64, 252, 252] -> Result of first convolutional layer
+                # [batch_size, 64, 252, 252] -> Result of first convolutional layer
                 nn.ReLU(inplace=True),
-                # [64, 252, 252] -> Result of first ReLU activation function
+                # [batch_size, 64, 252, 252] -> Result of first ReLU activation function
                 nn.MaxPool2d(kernel_size=7, stride=7, padding=0),
-                # [64, 36, 36] -> Result of first max pooling operation
+                # [batch_size, 64, 36, 36] -> Result of first max pooling operation
                 nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1),
-                # [128, 36, 36] -> Result of second convolutional layer
+                # [batch_size, 128, 36, 36] -> Result of second convolutional layer
                 nn.ReLU(inplace=True),
-                # [128, 36, 36] -> Result of second ReLU activation function
+                # [batch_size, 128, 36, 36] -> Result of second ReLU activation function
                 nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
-                # [128, 18, 18] -> Result of second max pooling operation
+                # [batch_size, 128, 18, 18] -> Result of second max pooling operation
                 nn.Flatten(),
-                # [128*18*18] -> Result of flattening with vector size of 128*18*18
+                # [batch_size, 128*18*18] -> Result of flattening with vector size of 128*18*18
                 nn.Linear(128 * 18 * 18, 512),
-                # [512] -> Creating a linear layer with flattened vector size
+                # [batch_size, 512] -> Creating a linear layer with flattened vector size
                 nn.ReLU(inplace=True),
-                # [512] -> Result of ReLU activation function
+                # [batch_size, 512] -> Result of ReLU activation function
                 nn.Linear(512, 64),
-                # [64] -> Creating another linear layer. The reason we have 2 steps for converting
+                # [batch_size, 64] -> Creating another linear layer. The reason we have 2 steps for converting
                 # flatten layer to linear layer is that we try to decrease dependencies of neurons
                 # and get better classifier
                 nn.ReLU(inplace=True),
-                # [64] -> Result of ReLU activation function
+                # [batch_size, 64] -> Result of ReLU activation function
                 nn.Dropout(),
-                # [64] -> Result of Drop-out operation
+                # [batch_size, 64] -> Result of Drop-out operation
                 nn.Linear(64, self.number_output)
-                # [self.number_output] -> Final output classes
+                # [batch_size, self.number_output] -> Final output classes
             )
 
             # Preprocessing the data for BasicCNN input
