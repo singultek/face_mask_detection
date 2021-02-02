@@ -278,12 +278,12 @@ class CNNClassifier(nn.Module):
         plt.grid(True)
         # Splitting the network name for creating title for plot
         plt.title('Backbone {}, # Batch {}, # Epochs {}, Learning Rate {}'.format(
-            str(network_name.split('-')[0][:-1]),
-            int(network_name.split('-')[1][:-1]),
-            int(network_name.split('-')[2][:-1]),
-            float(network_name.split('-')[3][:-1])))
+            str(network_name.split('-')[0]),
+            int(network_name.split('-')[1]),
+            int(network_name.split('-')[2]),
+            float(network_name.split('-')[3])))
         # Declaire the location of legend
-        plt.legend(loc='lower  right')
+        plt.legend(loc='lower right')
 
         # Getting currect script's directory and create a directory for saving the results
         script_base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -295,9 +295,10 @@ class CNNClassifier(nn.Module):
         plt.savefig("{}.png".format(os.path.join(saved_results_dir, network_name)))
         return
 
-    def train_network(self, training_set: Dataset,
-                      validation_set: Dataset,
+    def train_network(self, training_set: torch.utils.data.DataLoader,
+                      validation_set: torch.utils.data.DataLoader,
                       backbone: str,
+                      resnet_retrain_mode: str,
                       batch_size: int,
                       learning_rate: float,
                       epochs: int) -> None:
@@ -306,6 +307,7 @@ class CNNClassifier(nn.Module):
         Args:
             training_set: The training split of dataset
             validation_set: The validaiton split of dataset
+            resnet_retrain_mode: the string that indicates the choice for retraining on the ResNet training mode
             backbone: The string of network name
             batch_size: the integer which indicates the element processed at each mini-batch
             learning_rate: Learning rate for ADAM optimizer
@@ -324,7 +326,7 @@ class CNNClassifier(nn.Module):
         if not os.path.exists('./models/'):
             os.makedirs('./models/')
 
-        network_name = '{}-{}-{}-{}'.format(backbone, batch_size, epochs, learning_rate)
+        network_name = '{}({})-{}-{}-{}'.format(backbone, resnet_retrain_mode, batch_size, epochs, learning_rate)
         filepath = '{}.pth'.format(os.path.join('./models/', network_name))
 
         # Looping the each epochs
@@ -398,7 +400,7 @@ class CNNClassifier(nn.Module):
         return
 
     def eval_network(self,
-                     dataset: Dataset) -> float:
+                     dataset: torch.utils.data.DataLoader) -> float:
         """
         The method which computes the evaluation of Convolutional Neural Networks(both ResNet and BasicCNN)
         Args:

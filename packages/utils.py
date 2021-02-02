@@ -17,6 +17,7 @@ import cv2
 
 from .network import *
 from .dataset import *
+import torch.utils.data
 
 
 def face_detection() -> None:
@@ -241,17 +242,17 @@ def training(dataset_path: str,
     val_set.preprocess_operation(classifier.data_preprocess['eval'])
     test_set.preprocess_operation(classifier.data_preprocess['eval'])
     # Converting datasets into data loaders
-    train_set.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
-    val_set.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
-    test_set.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
+    train_set = train_set.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
+    val_set = val_set.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
+    test_set = test_set.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
     # Print some inside information of the data
     dataset.summary_data_characteristics([train_set, val_set, test_set], split_data)
     # Train the classifier
     print('\nTraining stage has started..\n')
-    classifier.train_network(train_set, val_set, backbone, batch_size, learning_rate, epochs)
+    classifier.train_network(train_set, val_set, backbone, resnet_retrain_mode, batch_size, learning_rate, epochs)
     # Load the best resulted model for validation
     print('\nLoading the best model found during trainig..\n')
-    network_name = '{}-{}-{}-{}'.format(backbone, batch_size, epochs, learning_rate)
+    network_name = '{}({})-{}-{}-{}'.format(backbone, resnet_retrain_mode, batch_size, epochs, learning_rate)
     filepath = '{}.pth'.format(os.path.join('./models/', network_name))
     classifier.load(saved_network_path=filepath)
     print('\nValidation stage has started..\n')
@@ -294,7 +295,7 @@ def evaluating(network_path: str,
     # Defining data preprocess operations
     dataset.preprocess_operation(classifier.data_preprocess['eval'])
     # Converting datasets into data loaders
-    dataset.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
+    dataset = dataset.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
 
     print('\nLoading the model to evaluate..\n')
     classifier.load(saved_network_path=network_path)
