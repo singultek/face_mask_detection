@@ -19,18 +19,30 @@ from .network import *
 from .dataset import *
 
 
-def face_detection() -> None:
+def webcam_capture(backbone: str,
+                   resnet_retrain_mode: str,
+                   device: str,
+                   network_path: str) -> None:
     """
     The method that captures the live image from webcam and classify this input image with pre-trained network
     Args:
-
-    Returns:
+        backbone: the string with the name of network to be used
+        resnet_retrain_mode: the string that indicates the choice for retraining on the ResNet training mode
+        device: the string that declares the device used to execute the process
+        network_path: the string that indicates the filepath of pretrained network
+        Returns:
         None
     """
     # Create a capture of webcam (by default 0 is webcam, if external camera will be used, 0 should be changed with 1)
     cap = cv2.VideoCapture(0)
     # Load the Haar Cascade filter from opencv module
     face_cascade_filter = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+
+
+    # Create a new classifier
+    classifier = CNNClassifier(backbone=backbone, resnet_retrain_mode=resnet_retrain_mode, device=device)
+    # Load the given network
+    classifier.load(saved_network_path=network_path)
 
     # Start the live video
     while True:
@@ -45,6 +57,35 @@ def face_detection() -> None:
         # Draw the rectangle on each detected face
         for (x, y, w, h) in faces:
             cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            face_image = Image.fromarray(image)
+            preprocess = classifier.data_preprocess['eval']
+            preprocessed_image = preprocess(face_image).unsqueeze(0).to(device)
+            label = classifier.classify_input(preprocessed_image)
+
+            print(type(label))
+            predict = label.item()
+            print(predict)
+            confidence_level = max(classifier(preprocessed_image)[1].squeeze()) * 100
+            print(confidence_level)
+            '''
+            logit, alter_label = classifier(preprocessed_image)
+            prob = torch.exp(alter_label)
+            a = list(prob.squeeze())
+            predict = a.index(max(a))
+            print(logit)
+            print(alter_label)
+            print(type(predict))
+            print(predict)
+            '''
+            # Write the predicted class on the frame
+            if predict == 0:
+                cv2.putText(image, "Mask, Confidence: {0:.2f}".format(confidence_level), (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            elif predict == 1:
+                cv2.putText(image, "No Mask, Confidence: {0:.2f}".format(confidence_level), (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 0, 255), 2)
+            elif predict == 2:
+                cv2.putText(image, "Wrong Mask, Confidence: {0:.2f}".format(confidence_level), (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+            else:
+                raise ValueError('Unexpected prediction, please check the class and prediction numbers')
         # Display the findings
         cv2.imshow('LIVE FACE DETECTION', image)
         # Live capturing will be stopped when user presses the ESC key
@@ -169,12 +210,7 @@ def parse_arguments() -> argparse.Namespace:
                                  help='(default = True) The boolean value which indicates whether data will be randomly shuffled or not')
 
     # Adding parsers for classify mode
-    classify_parser.add_argument('input_path',
-                                 default='None',
-                                 type=str or None,
-                                 help='(default = None) The input path to be used for classification process.'
-                                      'If input image path is not specified, webcam will be used by default')
-    classify_parser.add_argument('network_path',
+    classify_parser.add_argument('--network_path',
                                  type=str,
                                  help='A network file path to classify the input')
     classify_parser.add_argument('--device',
@@ -304,18 +340,26 @@ def evaluating(network_path: str,
     return
 
 
-def classifying(input_path: str,
-                network_path: str,
+def classifying(network_path: str,
                 device: str) -> None:
     """
     The main classifying method to perform the classification process of the network with input arguments
     Args:
-        input_path: the string that states file path of the input image which will be classified
         network_path: the string that provides the file path of the saved network
         device: the string that declares the device used to execute the process
     Returns:
         None
     """
-
-    print(input_path, network_path, device)
+    # Get the network information from given network_path information
+    if network_path is not None:
+        network_name = network_path.split('/')[-1]
+    else:
+        # Get the some pretrained models from models folder
+        network_path = 'models/ResNet-not_retrain-128-10-0.003.pth'
+        network_name = network_path.split('/')[-1]
+    # Split network name and get the backbone and retrain_mode information from given network_path
+    backbone = str(network_name.split('-')[0])
+    resnet_retrain_mode = str(network_name.split('-')[1])
+    # Give all necessary inputs that are needed to compute webcam_capture method
+    webcam_capture(backbone, resnet_retrain_mode, device, network_path)
     return
