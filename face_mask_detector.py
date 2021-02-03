@@ -55,8 +55,7 @@ def main():
                    command_line_args.shuffle)
     elif command_line_args.mode == 'classify':
         print("Classifying the input is executing!")
-        classifying(command_line_args.input_path,
-                    command_line_args.network_path,
+        classifying(command_line_args.network_path,
                     command_line_args.device)
     else:
         raise RuntimeError(
