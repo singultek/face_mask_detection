@@ -21,6 +21,11 @@ def main():
     """
     The main method for executing the working mode given by parsing command line arguments
 
+    There are 3 main working modes: training, evaluating and classifying.
+    training mode: The main training method to perform the training process of the network with input arguments
+    evaluating mode: The main evaluating method to perform the evaluation process of the network with input arguments
+    classifying mode: The main classifying method to perform the classification process of the network with input arguments
+
     Args:
 
     Returns:
