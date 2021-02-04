@@ -128,9 +128,9 @@ class Dataset(torch.utils.data.Dataset):
     def split_into_test_train(self,
                               proportions: list) -> list:
         """
-        The method which splits the dataset into given proortions
+        The method which splits the dataset into given proportions
         Args:
-            proportions: The proportion of dataset splits Example = [0.8, 0.2]
+            proportions: The proportion of dataset splits Example = [0.7, 0.15, 0.15]
         Returns:
             splitted_datasets
         """
@@ -166,6 +166,10 @@ class Dataset(torch.utils.data.Dataset):
         for class_j in range(0, self.number_class):
             # Index of considered element starts from 0
             start = 0
+            # For each class in the number_class, we split the that classes' dataset into number_splits
+            # In this case, each class of dataset (mask, no_mask, wrong_mask(if 3 dataset folder is used)) is devided into 3 proportions. For each proportion(current_split) in the splitted data,
+            # the data from each classes are added with respect to proportion(current split) * total dataset of corresponding class.
+            # At the end, splitted_datasets has splitted into 3 proportions (train,validation,test) all include all classes of dataset (mask, no_mask, wrong_mask(if 3 dataset folder is used))
             for current_split in range(0, number_splits):
                 # Calculating number of element for each class 'class_j'
                 n = int(proportions[current_split] * len(self.splitted_datasets_each_class[class_j]))
