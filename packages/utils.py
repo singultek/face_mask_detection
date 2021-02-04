@@ -62,7 +62,7 @@ def webcam_capture(backbone: str,
             # Compute preprocess operations and insert dimensions to preprocessed image thus it can be ready to load
             preprocess = classifier.data_preprocess['eval']
             preprocessed_image = preprocess(face_image).unsqueeze(0).to(device)
-            # Get the predicted label as orch.tensor
+            # Get the predicted label as torch.tensor
             label = classifier.classify_input(preprocessed_image)
             # Get the predicted label item as integer
             predict = label.item()
