@@ -24,13 +24,13 @@ def webcam_capture(backbone: str,
                    device: str,
                    network_path: str) -> None:
     """
-    The method that captures the live image from webcam and classify this input image with pre-trained network
+    The method that captures the live image from webcam and classify this input image with pre-trained or given network
     Args:
         backbone: the string with the name of network to be used
         resnet_retrain_mode: the string that indicates the choice for retraining on the ResNet training mode
         device: the string that declares the device used to execute the process
         network_path: the string that indicates the filepath of pretrained network
-        Returns:
+    Returns:
         None
     """
     # Create a capture of webcam (by default 0 is webcam, if external camera will be used, 0 should be changed with 1)
@@ -53,36 +53,38 @@ def webcam_capture(backbone: str,
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         # Detect the faces with pre-build detectMultiScale method
         faces = face_cascade_filter.detectMultiScale(gray, 1.3, 4)
-        # Draw the rectangle on each detected face
+        # Looping over each faces found by detectMUltiScale
         for (x, y, w, h) in faces:
+            # Draw the rectangle on each detected face
             cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            # Convert image to PIL Image
             face_image = Image.fromarray(image)
+            # Compute preprocess operations and insert dimensions to preprocessed image thus it can be ready to load
             preprocess = classifier.data_preprocess['eval']
             preprocessed_image = preprocess(face_image).unsqueeze(0).to(device)
+            # Get the predicted label as orch.tensor
             label = classifier.classify_input(preprocessed_image)
-
-            print(type(label))
+            # Get the predicted label item as integer
             predict = label.item()
-            print(predict)
+            # Get the output of the network (Forward method of network returns (logits, outputs) tuple.Thus, classifier(preprocessed_image)[1] is outputs) as confidence level
             confidence_level = max(classifier(preprocessed_image)[1].squeeze()) * 100
-            print(confidence_level)
+            # Create label and label colors dictionaries to store necessacry string and color codes
             label = {0: 'Mask',
                      1: 'No Mask',
                      2: 'Wrong Mask'}
             label_colors = {0: (0, 255, 0),
                             1: (10, 0, 255),
                             2: (255, 0, 0)}
+            # Put text of predictions on the image frame from webcam
             try:
                 cv2.putText(image, str(label[predict]) + " - Confidence: {0:.2f}".format(confidence_level), (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, label_colors[predict], 2)
             except ValueError:
                 raise ValueError('Unexpected prediction, please check the class and prediction numbers')
-
         # Display the findings
         cv2.imshow('LIVE FACE DETECTION', image)
         # Live capturing will be stopped when user presses the ESC key
         if cv2.waitKey(1) == 27:
             break
-
     # Release the live capturing video
     cap.release()
     # Destroy all the windows
@@ -92,9 +94,7 @@ def webcam_capture(backbone: str,
 
 def parse_arguments() -> argparse.Namespace:
     """
-    The method is created for enhancing user interface on the command line by parsing
-    command line arguments.
-
+    The method is created for enhancing user interface on the command line by parsing command line arguments.
     Args:
 
     Returns:
@@ -226,7 +226,6 @@ def parse_arguments() -> argparse.Namespace:
     # There is no split_data attribute belongs to Namespace when we don't use training mode. Thus, we will except AttributeError but we can just pass that.
     except AttributeError:
         pass
-
     return args_parsed
 
 
@@ -253,7 +252,6 @@ def training(dataset_path: str,
         number_workers: the integer that gives the number of working unit while loading data
         device: the string that declares the device used to execute the process
         shuffle: The boolean value which indicates whether data will be randomly shuffled or not
-
     Returns:
         None
     """
@@ -273,16 +271,19 @@ def training(dataset_path: str,
     test_set = test_set.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
     # Print some inside information of the data
     dataset.summary_data_characteristics([train_set, val_set, test_set], split_data)
-    # Split dataset_path argument to give dataset name (whether it is consider 2 or 3 classes for wearing mask) for train_network
+    # Split dataset_path argument to give dataset name (whether it is consider dataset with 2 or 3 classes for wearing mask) for train_network
     new_dataset_path = dataset_path.split('/')[1].split('_')[1] + dataset_path.split('/')[1].split('_')[2]
     # Train the classifier
     print('\nTraining stage has started..\n')
     classifier.train_network(train_set, val_set, backbone, resnet_retrain_mode, new_dataset_path, batch_size, learning_rate, epochs)
     # Load the best resulted model for validation
     print('\nLoading the best model found during trainig..\n')
+    # In order to accomplish proper split operationin the future, we will except learning rate as float up to 8 digits.
+    # (Although, learning rate can be that low, it is not recommended due to ADAM optimizer. That term will be starting learning rate of ADAM optimizer and too small may not good for learning process)
     network_name = '{}-{}-{}-{}-{}-{:.8f}'.format(backbone, resnet_retrain_mode, new_dataset_path, batch_size, epochs, learning_rate)
     filepath = '{}.pth'.format(os.path.join('./models/', network_name))
     classifier.load(saved_network_path=filepath)
+    # Evaluate the classifier
     print('\nValidation stage has started..\n')
     train_acc = classifier.eval_network(train_set)
     val_acc = classifier.eval_network(val_set)
@@ -324,9 +325,10 @@ def evaluating(network_path: str,
     dataset.preprocess_operation(classifier.data_preprocess['eval'])
     # Converting datasets into data loaders
     dataset = dataset.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
-
+    # Loading the model to evaluate
     print('\nLoading the model to evaluate..\n')
     classifier.load(saved_network_path=network_path)
+    # Evaluate the classifier
     print('\nValidation stage has started..\n')
     acc = classifier.eval_network(dataset)
     print('\nAccuracy: {} of the network in the {}\n'.format(round(acc, 4), network_path))
@@ -344,11 +346,11 @@ def classifying(network_path: str,
         None
     """
     # Get the network information from given network_path information
-    if network_path is not None:
+    if network_path is not None and os.path.exists(network_path):
         network_name = network_path.split('/')[-1]
     else:
         # Get the some pretrained models from models folder
-        network_path = 'models/ResNet-not_retrain-2classes-64-5-0.003.pth'
+        network_path = 'models/ResNet-not_retrain-2classes-64-60-0.001.pth'
         network_name = network_path.split('/')[-1]
     # Split network name and get the backbone and retrain_mode information from given network_path
     backbone = str(network_name.split('-')[0])
