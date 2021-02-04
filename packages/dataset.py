@@ -63,8 +63,7 @@ class Dataset(torch.utils.data.Dataset):
         self.output_classes = sorted(self.output_classes)
         self.number_class = len(self.output_classes)
 
-        # If we have empty_dataset= False, we will load the file names and labes into
-        # files and labels empty lists
+        # If we have empty_dataset = False, we will load the file names and labes into files and labels empty lists
         if not empty_dataset:
             counter = 0
             # Looping over each output classes
@@ -74,8 +73,7 @@ class Dataset(torch.utils.data.Dataset):
                 # For each created file path, we get the list of image files
                 output_classes_folder_files = os.listdir(output_classes_folder)
                 # Creating files list which consists of each image files path
-                files = [os.path.join(output_classes_folder, file) for file in output_classes_folder_files
-                         if os.path.isfile(os.path.join(output_classes_folder, file)) and file.endswith('.jpg')]
+                files = [os.path.join(output_classes_folder, file) for file in output_classes_folder_files if os.path.isfile(os.path.join(output_classes_folder, file)) and file.endswith('.jpg')]
                 # Extending created files path list to class attribute
                 self.files.extend(files)
                 # Extending file labels to class attribute
@@ -92,7 +90,6 @@ class Dataset(torch.utils.data.Dataset):
             None
         Returns:
             lenght of dataset
-
         """
         return len(self.files)
 
@@ -154,10 +151,11 @@ class Dataset(torch.utils.data.Dataset):
         splitted_datasets = []
         self.splitted_datasets_each_class = {}
         # Adding empty list into each key value in the dictionary
+        # Example {0:[], 1:[], 2:[], ..}
         for classes in range(0, self.number_class):
             self.splitted_datasets_each_class[classes] = []
         # Adding image file from self.files to dictionary with respect to its label
-        # Example: dictionary key: label and dictionary value: image file
+        # Example: dictionary key -> label and dictionary value -> image file
         for image_file in range(0, len(self.files)):
             self.splitted_datasets_each_class[self.labels[image_file]].append(image_file)
         # Creating Dataset object for each split
