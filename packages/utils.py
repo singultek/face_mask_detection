@@ -38,7 +38,6 @@ def webcam_capture(backbone: str,
     # Load the Haar Cascade filter from opencv module
     face_cascade_filter = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
-
     # Create a new classifier
     classifier = CNNClassifier(backbone=backbone, resnet_retrain_mode=resnet_retrain_mode, device=device)
     # Load the given network
@@ -67,25 +66,17 @@ def webcam_capture(backbone: str,
             print(predict)
             confidence_level = max(classifier(preprocessed_image)[1].squeeze()) * 100
             print(confidence_level)
-            '''
-            logit, alter_label = classifier(preprocessed_image)
-            prob = torch.exp(alter_label)
-            a = list(prob.squeeze())
-            predict = a.index(max(a))
-            print(logit)
-            print(alter_label)
-            print(type(predict))
-            print(predict)
-            '''
-            # Write the predicted class on the frame
-            if predict == 0:
-                cv2.putText(image, "Mask, Confidence: {0:.2f}".format(confidence_level), (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            elif predict == 1:
-                cv2.putText(image, "No Mask, Confidence: {0:.2f}".format(confidence_level), (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (10, 0, 255), 2)
-            elif predict == 2:
-                cv2.putText(image, "Wrong Mask, Confidence: {0:.2f}".format(confidence_level), (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-            else:
+            label = {0: 'Mask',
+                     1: 'No Mask',
+                     2: 'Wrong Mask'}
+            label_colors = {0: (0, 255, 0),
+                            1: (10, 0, 255),
+                            2: (255, 0, 0)}
+            try:
+                cv2.putText(image, str(label[predict]) + " - Confidence: {0:.2f}".format(confidence_level), (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, label_colors[predict], 2)
+            except ValueError:
                 raise ValueError('Unexpected prediction, please check the class and prediction numbers')
+
         # Display the findings
         cv2.imshow('LIVE FACE DETECTION', image)
         # Live capturing will be stopped when user presses the ESC key
@@ -282,12 +273,14 @@ def training(dataset_path: str,
     test_set = test_set.data_loader(batch_size=batch_size, shuffle=shuffle, number_workers=number_workers)
     # Print some inside information of the data
     dataset.summary_data_characteristics([train_set, val_set, test_set], split_data)
+    # Split dataset_path argument to give dataset name (whether it is consider 2 or 3 classes for wearing mask) for train_network
+    new_dataset_path = dataset_path.split('/')[1].split('_')[1] + dataset_path.split('/')[1].split('_')[2]
     # Train the classifier
     print('\nTraining stage has started..\n')
-    classifier.train_network(train_set, val_set, backbone, resnet_retrain_mode, batch_size, learning_rate, epochs)
+    classifier.train_network(train_set, val_set, backbone, resnet_retrain_mode, new_dataset_path, batch_size, learning_rate, epochs)
     # Load the best resulted model for validation
     print('\nLoading the best model found during trainig..\n')
-    network_name = '{}-{}-{}-{}-{}'.format(backbone, resnet_retrain_mode, batch_size, epochs, learning_rate)
+    network_name = '{}-{}-{}-{}-{}-{:.8f}'.format(backbone, resnet_retrain_mode, new_dataset_path, batch_size, epochs, learning_rate)
     filepath = '{}.pth'.format(os.path.join('./models/', network_name))
     classifier.load(saved_network_path=filepath)
     print('\nValidation stage has started..\n')
@@ -355,7 +348,7 @@ def classifying(network_path: str,
         network_name = network_path.split('/')[-1]
     else:
         # Get the some pretrained models from models folder
-        network_path = 'models/ResNet-not_retrain-128-10-0.003.pth'
+        network_path = 'models/ResNet-not_retrain-2classes-64-5-0.003.pth'
         network_name = network_path.split('/')[-1]
     # Split network name and get the backbone and retrain_mode information from given network_path
     backbone = str(network_name.split('-')[0])

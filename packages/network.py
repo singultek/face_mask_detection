@@ -276,12 +276,13 @@ class CNNClassifier(nn.Module):
         plt.xlabel('Epochs')
         plt.grid(True)
         # Splitting the network name for creating title for plot
-        plt.title('Backbone {}-{}, # Batch {}, # Epochs {}, Learning Rate {}'.format(
+        plt.title('Backbone {}-{}, Dataset {}, \n# Batch {}, # Epochs {}, Learning Rate {}'.format(
             str(network_name.split('-')[0]),
             str(network_name.split('-')[1]),
-            int(network_name.split('-')[2]),
+            str(network_name.split('-')[2]),
             int(network_name.split('-')[3]),
-            float(network_name.split('-')[4])))
+            int(network_name.split('-')[4]),
+            float(network_name.split('-')[5])))
         # Declaire the location of legend
         plt.legend(loc='lower right')
 
@@ -299,6 +300,7 @@ class CNNClassifier(nn.Module):
                       validation_set: torch.utils.data.DataLoader,
                       backbone: str,
                       resnet_retrain_mode: str,
+                      new_dataset_path: str,
                       batch_size: int,
                       learning_rate: float,
                       epochs: int) -> None:
@@ -307,8 +309,9 @@ class CNNClassifier(nn.Module):
         Args:
             training_set: The training split of dataset
             validation_set: The validaiton split of dataset
-            resnet_retrain_mode: the string that indicates the choice for retraining on the ResNet training mode
             backbone: The string of network name
+            resnet_retrain_mode: the string that indicates the choice for retraining on the ResNet training mode
+            new_dataset_path: The string that indicates the dataset
             batch_size: the integer which indicates the element processed at each mini-batch
             learning_rate: Learning rate for ADAM optimizer
             epochs: Nuber ıf epochs
@@ -326,7 +329,7 @@ class CNNClassifier(nn.Module):
         if not os.path.exists('./models/'):
             os.makedirs('./models/')
 
-        network_name = '{}-{}-{}-{}-{}'.format(backbone, resnet_retrain_mode, batch_size, epochs, learning_rate)
+        network_name = '{}-{}-{}-{}-{}-{:.8f}'.format(backbone, resnet_retrain_mode, new_dataset_path, batch_size, epochs, learning_rate)
         filepath = '{}.pth'.format(os.path.join('./models/', network_name))
 
         # Looping the each epochs
