@@ -49,8 +49,7 @@ class CNNClassifier(nn.Module):
         # Class attributes are declared
         self.number_output = 3  # In Face Mask Detection Problem, there are 3 classes
         self.net = None  # The network will be assigned in the next methods
-        self.device = torch.device(
-            device)  # The attribute to assign the selected device to the network and torch module
+        self.device = torch.device(device)  # The attribute to assign the selected device to the network and torch module
         self.data_preprocess = None  # The attribute for applying data augmentation/preprocessing
 
         if backbone == "ResNet" and backbone is not None:
@@ -80,7 +79,7 @@ class CNNClassifier(nn.Module):
             self.net.fc = nn.Linear(2048, self.number_output)
 
             # Preprocessing the data for ResNet input
-            # While normalization, mean and standard deviation is the original ones which used to train ResNet
+            # While normalization process, the used mean and standard deviation are the original ones which were used to train ResNet
             self.data_preprocess = {
                 'train': transforms.Compose([
                     transforms.RandomResizedCrop(224, scale=(0.8, 1.2), ratio=(3. / 4., 4. / 3.)),
@@ -159,7 +158,6 @@ class CNNClassifier(nn.Module):
 
         # Move network to the selected device's memory
         self.net.to(self.device)
-
         return
 
     def save(self,
@@ -187,7 +185,6 @@ class CNNClassifier(nn.Module):
         # Load the checkpoint parameters from saved networks path
         self.net.load_state_dict(torch.load(saved_network_path, map_location=self.device))
         self.net.to(self.device)
-
         return
 
     def forward(self,
@@ -200,10 +197,9 @@ class CNNClassifier(nn.Module):
             logits: Output before the activation function. logits will be used to compute loss function more precisely.
             outputs: Output after the activation function
         """
-
+        # Compute the logits and outputs
         logits = self.net(x)
         outputs = F.softmax(logits, dim=1)
-
         return logits, outputs
 
     @staticmethod
@@ -216,8 +212,8 @@ class CNNClassifier(nn.Module):
         Returns:
             decisions: The decisions(winning class ID) for each example of dataset
         """
+        # Compute the decision of network from outputs by using argmax
         decisions = torch.argmax(outputs, dim=1)
-
         return decisions
 
     @staticmethod
@@ -232,6 +228,7 @@ class CNNClassifier(nn.Module):
         Returns:
             loss: The value of the loss function
         """
+        # Compute the loss by using Cross Entropy
         loss = F.cross_entropy(logits, labels, reduction='mean')
         return loss
 
@@ -318,21 +315,25 @@ class CNNClassifier(nn.Module):
         Returns:
             None
         """
-        # Initialize some elements
+        # Turning on training mode and initialize optimizer
         self.net.train()
         optimizer = torch.optim.Adam(params=filter(lambda p: p.requires_grad, self.net.parameters()), lr=learning_rate)
-        best_val_acc = -1.  # the best accuracy computed on the validation data
-        best_epoch = -1  # the epoch in which the best accuracy above was computed
-        train_acc = np.zeros(epochs)  # The empty array for storing the training accuracy for each epochs
-        val_acc = np.zeros(epochs)  # The empty array for storing the validation accuracy for each epochs
-
+        # The best accuracy computed on the validation data and it's corresponding epoch number
+        best_val_acc = -1.
+        best_epoch = -1
+        # The empty array for storing the training and validation accuracy for each epochs
+        train_acc = np.zeros(epochs)
+        val_acc = np.zeros(epochs)
+        # If there are no models folder path, create one
         if not os.path.exists('./models/'):
             os.makedirs('./models/')
 
+        # In order to accomplish proper split operationin the future, we will except learning rate as float up to 8 digits.
+        # (Although, learning rate can be that low, it is not recommended due to ADAM optimizer. That term will be starting learning rate of ADAM optimizer and too small may not good for learning process)
         network_name = '{}-{}-{}-{}-{}-{:.8f}'.format(backbone, resnet_retrain_mode, new_dataset_path, batch_size, epochs, learning_rate)
         filepath = '{}.pth'.format(os.path.join('./models/', network_name))
 
-        # Looping the each epochs
+        # Looping over the each epochs
         for e in range(0, epochs):
             print("Training the epoch {} out of {}".format(e + 1, epochs))
 
@@ -342,6 +343,7 @@ class CNNClassifier(nn.Module):
             # Initializing the accumuated training examples of current epoch
             num_current_epoch_training_examples = 0.
 
+            # Get training_set data from dataLoaders
             for X, Y in training_set:
                 # Defining the mini-batch size then add it to number of accumuated training examples
                 batch_number_train_example = X.shape[0]
@@ -376,7 +378,7 @@ class CNNClassifier(nn.Module):
 
                     # Turning on the training mode again
                     self.net.train()
-
+                    # Print loss and training accuracy for current mini-batch
                     print("mini-batch:\tloss={0:.4f}, training_acc={1:.2f}".format(loss.item(), batch_training_accuracy))
 
             # Compute the validation accuracy
@@ -392,12 +394,10 @@ class CNNClassifier(nn.Module):
             train_acc[e] = current_epoch_training_accuracy
             val_acc[e] = validation_accuracy
             current_epoch_training_loss /= num_current_epoch_training_examples
-
-            print(("loss={:.4f} - training_acc={:.4f} - validation_acc={:.4f}"
-                   + (" - BEST!" if best_epoch == e + 1 else ""))
-                  .format(current_epoch_training_loss, current_epoch_training_accuracy,
-                          validation_accuracy))
-
+            # Print loss, training accuracy and validation accuracy for current epoch
+            print(("loss={:.4f} - training_acc={:.4f} - validation_acc={:.4f}" + (" - BEST!" if best_epoch == e + 1 else ""))
+                  .format(current_epoch_training_loss, current_epoch_training_accuracy, validation_accuracy))
+        # Plot the performance of network
         self.__plot(network_name, train_acc, val_acc)
         return
 
@@ -431,9 +431,7 @@ class CNNClassifier(nn.Module):
                 minibatch_labels.append(Y)
 
             # Computing the performance
-
-            network_accuracy = CNNClassifier.__performance(torch.cat(minibatch_output, dim=0),
-                                                           torch.cat(minibatch_labels, dim=0))
+            network_accuracy = CNNClassifier.__performance(torch.cat(minibatch_output, dim=0), torch.cat(minibatch_labels, dim=0))
         # Switch back to training mode if needed
         if self.net.training:
             self.net.train()
@@ -454,8 +452,9 @@ class CNNClassifier(nn.Module):
 
         # Since we will classify the input image, we need to switch off autograd
         with torch.no_grad():
-
+            # Load input_image to device memory
             input_image.to(self.device)
+            # Compute the outputs
             _, outputs = self.forward(input_image)
 
         # Switch back to training mode if needed
