@@ -216,10 +216,10 @@ In order to see the help for train mode, one can run following on the command li
 `$ python3 face_mask_detector.py train -h`
 
 ```
-usage: face_mask_detector.py train [-h] [--backbone {ResNet,BasicCNN}] [--resnet_retrain_mode {not_retrain,retrain}]
-                                   [--batch_size BATCH_SIZE] [--epochs EPOCHS] [--split_data SPLIT_DATA SPLIT_DATA SPLIT_DATA]
-                                   [--learning_rate LEARNING_RATE] [--number_workers NUMBER_WORKERS] [--device DEVICE]
-                                   [--shuffle SHUFFLE]
+
+usage: face_mask_detector.py train [-h] [--backbone {ResNet,BasicCNN}] [--resnet_retrain_mode {not_retrain,retrain}] [--batch_size BATCH_SIZE]
+                                   [--epochs EPOCHS] [--split_data SPLIT_DATA SPLIT_DATA SPLIT_DATA] [--learning_rate LEARNING_RATE]
+                                   [--number_workers NUMBER_WORKERS] [--device DEVICE] [--shuffle SHUFFLE]
                                    dataset_path
 
 Train/re-train the network
@@ -244,20 +244,22 @@ optional arguments:
                         (default = 3) The number of unit which will work during loading data stage
   --device DEVICE       (default = cpu) The device which will be used to compute the neural network {cpu, cuda:0, cuda:1, ...}
   --shuffle SHUFFLE     (default = True) The boolean value which indicates whether data will be randomly shuffled or not
+
 ```
 One example of usage of train mode:
 
-`$ python3 face_mask_detector.py train ./dataset/labeled/ --backbone ResNet --resnet_retrain_mode retrain --split_data [0.70, 0.20, 0.10]`: trains the dataset on `./dataset/labeled/` with ResNet50 backbone and unfreezing the last 4 layers of network parameters (mentioned as retrain). If `--resnet_retrain_mode` is selected as `not_retrain`, the network parameters are freezing.
+`$ python3 face_mask_detector.py train ./dataset_3_classes/labeled/ --backbone ResNet --resnet_retrain_mode retrain --split_data [0.70, 0.20, 0.10]`: trains the dataset on `./dataset_3_classes/labeled/` with ResNet50 backbone and unfreezing the last 4 layers of network parameters (mentioned as retrain). If `--resnet_retrain_mode` is selected as `not_retrain`, the network parameters are freezing.
 
 
 ### Evaluating
 
 In order to see the help for evaluate mode, one can run following on the command line:
 `$ python3 face_mask_detector.py evaluate -h`
+
 ```
-usage: face_mask_detector.py evaluate [-h] [--backbone {ResNet,BasicCNN}] [--resnet_retrain_mode {not_retrain,retrain}]
-                                      [--batch_size BATCH_SIZE] [--number_workers NUMBER_WORKERS] [--device DEVICE]
-                                      [--shuffle SHUFFLE]
+
+usage: face_mask_detector.py evaluate [-h] [--backbone {ResNet,BasicCNN}] [--resnet_retrain_mode {not_retrain,retrain}] [--batch_size BATCH_SIZE]
+                                      [--number_workers NUMBER_WORKERS] [--device DEVICE] [--shuffle SHUFFLE]
                                       network_path dataset_path
 
 Evaluate/re-evaluate the network
@@ -278,17 +280,21 @@ optional arguments:
                         (default = 3) The number of unit which will work during loading data stage
   --device DEVICE       (default = cpu) The device which will be used to compute the neural network {cpu, cuda:0, cuda:1, ...}
   --shuffle SHUFFLE     (default = True) The boolean value which indicates whether data will be randomly shuffled or not
+
 ```
+
 One example of usage of evaluate mode:
 
-`$ python3 face_mask_detector.py evaluate ./models/ResNet-not_retrain-64-3-0.001.pth ./dataset/labeled/ --resnet_retrain_mode not_retrain --shuffle False`: evaluates the model `./models/ResNet-not_retrain-64-3-0.001.pth` performance on the dataset `./dataset/labeled/ ` with the default backbone(ResNet50) and `not_retrain` mode, which means freezing the ResNet50 network parameters.
+`$ python3 face_mask_detector.py evaluate ./models/ResNet-not_retrain-64-3-0.001.pth ./dataset_3_classes/labeled/ --resnet_retrain_mode not_retrain --shuffle False`: evaluates the model `./models/ResNet-not_retrain-64-3-0.001.pth` performance on the dataset `./dataset_3_classes/labeled/ ` with the default backbone(ResNet50) and `not_retrain` mode, which means freezing the ResNet50 network parameters.
 
 
 ### Classify
 
 In order to see the help for classify mode, one can run following on the command line:
 `$ python3 face_mask_detector.py classify -h`
+
 ```
+
 usage: face_mask_detector.py classify [-h] [--device DEVICE] network_path
 
 Classify the input image
@@ -300,10 +306,11 @@ optional arguments:
   -h, --help       show this help message and exit
   --device DEVICE  (default = cpu) The device which will be used to compute classification process {cpu, cuda:0, cuda:1, ...}
 
+
 ```
 One example of usage of evaluate mode:
 
-`$ python3 face_mask_detector.py classify models/ResNet-retrain-2classes-64-60-0.00010000.pt`: classify the webcam image based on model `models/BasicCNN-not_retrain-64-10-0.001.pth` by using default device: `cpu`.  
+`$ python3 face_mask_detector.py classify models/ResNet-retrain-2classes-64-60-0.00010000.pt`: classify the webcam image based on model `models/BasicCNN-not_retrain-64-10-0.001.pth` by using default device: `cpu`. 
 
 >Attention! It is highly recommended to be careful about giving necessary and proper network_path attribute for classifying 2 or 3 classes. 
 
