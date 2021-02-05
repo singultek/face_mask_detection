@@ -32,7 +32,7 @@ At the third and the last one, CNN from scratch (which is mentioned as BasicCNN)
   <img src="images/BasicCNN.png" width="600">
   </p>
   
-The input image of 3x256x256 is fed into the first convolutional layer, which has 64 output channels, 5x5 kernel, 1 stride and 1 padding. This result is passed through ReLU function and max pooling layer with 7x7 kernel, 7 stride and 0 padding. One more convolutional, ReLU and max pooling layers are applied with different kernel size, stride and padding. At the end of max pooling, flatten operation is applied to change the dimensions. In order to get more convenient results 2 linear and ReLU operations are applied sequentially. After that, dropout is used to get better results. Finally, with linear layer, softmax activation function is used to obtain output classes. 
+The input image of 3x256x256 is fed into the first convolutional layer, which has 64 output channels, 5x5 kernel, 1 stride and 0 padding. This result is passed through ReLU function and max pooling layer with 7x7 kernel, 7 stride and 0 padding. One more convolutional, ReLU and max pooling layers are applied with different kernel size, stride and padding. At the end of max pooling, flatten operation is applied to change the dimensions. In order to get more convenient results 2 linear and ReLU operations are applied sequentially. After that, dropout is used to get better results. Finally, with linear layer, softmax activation function is used to obtain output classes. 
 
 
 The dataset of the project cannot be shared on github due to privacy issues. The dataset consists of 3 classes. Each class and its number of data follow as:
