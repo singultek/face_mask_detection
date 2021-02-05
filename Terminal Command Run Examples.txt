@@ -2,4 +2,8 @@ python3 face_mask_detector.py train ./dataset/labeled/
 
 python3 face_mask_detector.py evaluate ./models/ResNet-not_retrain-64-3-0.001.pth ./dataset/labeled/ --resnet_retrain_mode not_retrain
 
-python3 face_mask_detector.py classify models/BasicCNN-not_retrain-64-10-0.001.pth
+python3 face_mask_detector.py classify models/ResNet-retrain-3classes-64-10-0.00010000.pth
+python3 face_mask_detector.py classify models/ResNet-not_retrain-3classes-64-60-0.00100000.pth
+
+python3 face_mask_detector.py classify models/ResNet-not_retrain-2classes-64-60-0.00010000.pth
+

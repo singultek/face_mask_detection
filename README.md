@@ -57,6 +57,10 @@ The dataset is collected from friends and family members. However, the dataset s
 │   │   ├── no_mask
 │   │   ├── wrong_mask
 │   ├── unlabeled
+├── demo_gifs
+│   ├── ResNet-not_retrain-3classes-64-60-0.00100000.gif
+│   ├── ResNet-retrain-2classes-64-60-0.00010000.gif
+│   ├── ResNet-retrain-3classes-64-60-0.00010000.gif
 ├── images
 │   ├── BasicCNN.png
 │   ├── ResNet50.png
@@ -310,11 +314,11 @@ One example of usage of evaluate mode:
 | model                                              | training acc. | validation acc. |   test acc.   |
 |----------------------------------------------------|---------------|-----------------|---------------|
 | ResNet-not_retrain-2classes-64-60-0.00100000.pth   |   96.04       |     100.00      |     98.00     |
-| ResNet-not_retrain-2classes-64-60-0.00010000.pt    |   94.49       |     100.00      |     95.00     |
-| ResNet-retrain-2classes-64-60-0.00100000.pt        |   98.90       |      98.96      |     95.00     |
-| ResNet-retrain-2classes-64-60-0.00010000.pt        |   97.80       |     100.00      |     99.00     |
-| BasicCNN-not_retrain-2classes-64-60-0.00100000.pt  |   79.52       |      98.88      |     73.00     |
-| BasicCNN-not_retrain-2classes-64-60-0.00010000.pt  |   82.60       |      95.83      |     74.00     |
+| ResNet-not_retrain-2classes-64-60-0.00010000.pth   |   94.49       |     100.00      |     95.00     |
+| ResNet-retrain-2classes-64-60-0.00100000.pth       |   98.90       |      98.96      |     95.00     |
+| ResNet-retrain-2classes-64-60-0.00010000.pth       |   97.80       |     100.00      |     99.00     |
+| BasicCNN-not_retrain-2classes-64-60-0.00100000.pth |   79.52       |      98.88      |     73.00     |
+| BasicCNN-not_retrain-2classes-64-60-0.00010000.pth |   82.60       |      95.83      |     74.00     |
 | ResNet-not_retrain-3classes-64-60-0.00100000.pth   |   91.67       |      84.62      |     84.28     |
 | ResNet-not_retrain-3classes-64-60-0.00010000.pth   |   89.07       |      80.77      |     76.73     |
 | ResNet-retrain-3classes-64-60-0.00100000.pth       |   85.52       |      83.33      |     77.99     |
@@ -337,6 +341,16 @@ One example of usage of evaluate mode:
 
 When the results are examined, 2 main outcome can be seen. First observation one can make is that, training the networks ResNet50 and BasicCNN with 2 classes dataset gives more robust results. Even though, 2 classes dataset is quite small, 647 images in total, networks can perform descent performance. If one examine this case more carefully, difference between BasicCNN and ResNet50 will be seen immediately. Since BasicCNN is a network, will be trained from scratch, 647 data is not enough to perform similiar to ResNet50. In the case of 3 classes dataset, 1047 images in total, the best performance was reached by not retrained ResNet50 with learning rate 0.001 and retrained ResNet50 0.0001 due to the fact that ResNet50 is powerful and capable network. Also, when retrain is needed, going lower learning rates may be better option to train network better. The second observation one can come up is that, validation accuracy of ResNet50 can be greater than training accuracy. The possible answer for this problem is using of dropouts. Dropout technique is only used during training, it is not used while evaluation is processing. This results with getting stuck of validation accuracy since disabling neurons, some of the information about each data sample is disappeared, and as a result of that subsequent layers try to make predictions based on lost informations. Training accuracy is lower because dropout method makes networks prediction harder to get correct predictions. However, during the validation process network can use all neurons and their informations. Hence, network has all of its computational power to predict the class and it might perform better.   
 
+
+### Demo Gifs
+
+![ResNet-not_retrain-3classes-64-60-0.00100000](https://github.com/singultek/face_mask_detection/blob/main/demo_gifs/ResNet-not_retrain-3classes-64-60-0.00100000.gif)
+
+
+![ResNet-retrain-2classes-64-60-0.00010000](https://github.com/singultek/face_mask_detection/blob/main/demo_gifs/ResNet-retrain-2classes-64-60-0.00010000.gif)
+
+
+![ResNet-retrain-3classes-64-60-0.00010000](https://github.com/singultek/face_mask_detection/blob/main/demo_gifs/ResNet-retrain-3classes-64-60-0.00010000.gif)
 
 ---
 ### About Author
