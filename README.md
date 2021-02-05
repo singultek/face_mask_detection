@@ -58,16 +58,39 @@ The dataset is collected from friends and family members. However, the dataset s
 │   │   ├── wrong_mask
 │   ├── unlabeled
 ├── images
-│   ├── resnetfinetune.png
+│   ├── BasicCNN.png
+│   ├── ResNet50.png
 ├── models
+│   ├── BasicCNN-not_retrain-2classes-64-60-0.00010000.pth
+│   ├── BasicCNN-not_retrain-2classes-64-60-0.00100000.pth
+│   ├── BasicCNN-not_retrain-3classes-64-60-0.00010000.pth
+│   ├── BasicCNN-not_retrain-3classes-64-60-0.00100000.pth
+│   ├── ResNet-not_retrain-2classes-64-60-0.00010000.pth
 │   ├── ResNet-not_retrain-2classes-64-60-0.00100000.pth
+│   ├── ResNet-not_retrain-3classes-64-60-0.00010000.pth
+│   ├── ResNet-not_retrain-3classes-64-60-0.00100000.pth
+│   ├── ResNet-retrain-2classes-64-60-0.00010000.pth
+│   ├── ResNet-retrain-2classes-64-60-0.00100000.pth
+│   ├── ResNet-retrain-3classes-64-60-0.00010000.pth
+│   ├── ResNet-retrain-3classes-64-60-0.00100000.pth
 ├── packages
 │   ├── __init__.py
 │   ├── dataset.py
 │   ├── network.py
 │   └── utils.py
 └── results
-|   ├── ResNet-not_retrain-2classes-64-60-0.00100000.png
+│   ├── BasicCNN-not_retrain-2classes-64-60-0.00010000.png
+│   ├── BasicCNN-not_retrain-2classes-64-60-0.00100000.png
+│   ├── BasicCNN-not_retrain-3classes-64-60-0.00010000.png
+│   ├── BasicCNN-not_retrain-3classes-64-60-0.00100000.png
+│   ├── ResNet-not_retrain-2classes-64-60-0.00010000.png
+│   ├── ResNet-not_retrain-2classes-64-60-0.00100000.png
+│   ├── ResNet-not_retrain-3classes-64-60-0.00010000.png
+│   ├── ResNet-not_retrain-3classes-64-60-0.00100000.png
+│   ├── ResNet-retrain-2classes-64-60-0.00010000.png
+│   ├── ResNet-retrain-2classes-64-60-0.00100000.png
+│   ├── ResNet-retrain-3classes-64-60-0.00010000.png
+│   ├── ResNet-retrain-3classes-64-60-0.00100000.png
 ├── __init__.py
 ├── face_mask_detector.py
 ├── haarcascade_frontalface_default.xml
