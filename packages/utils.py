@@ -148,7 +148,7 @@ def parse_arguments() -> argparse.Namespace:
                               nargs=3,
                               default=[0.7, 0.15, 0.15],
                               type=str,
-                              help='(default = [0.8,0.2]) The dataset proportions for training process')
+                              help='(default = [0.7,0.15,0.15]) The dataset proportions for training process')
     train_parser.add_argument('--learning_rate',
                               default=0.001,
                               type=float,

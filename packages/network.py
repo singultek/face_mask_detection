@@ -362,7 +362,7 @@ class CNNClassifier(nn.Module):
                 optimizer.zero_grad()
                 # Compute the gradients
                 loss.backward()
-                # Update the weşghts with respect to optimizer
+                # Update the weights with respect to optimizer
                 optimizer.step()
 
                 # Compute the performance of network on the mini-batch
