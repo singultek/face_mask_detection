@@ -201,7 +201,7 @@ def parse_arguments() -> argparse.Namespace:
                                  help='(default = True) The boolean value which indicates whether data will be randomly shuffled or not')
 
     # Adding parsers for classify mode
-    classify_parser.add_argument('--network_path',
+    classify_parser.add_argument('network_path',
                                  type=str,
                                  help='A network file path to classify the input')
     classify_parser.add_argument('--device',
@@ -221,8 +221,7 @@ def parse_arguments() -> argparse.Namespace:
                 raise ValueError("Invalid dataset split input. Please try to use proper format, like 0.7 0.15 0.15")
 
         if split_sum != 1.0:
-            raise ValueError(
-                "Invalid dataset split input. The sum of proportions of split should be exactly 1.0, like 0.7 0.15 0.15")
+            raise ValueError("Invalid dataset split input. The sum of proportions of split should be exactly 1.0, like 0.7 0.15 0.15")
     # There is no split_data attribute belongs to Namespace when we don't use training mode. Thus, we will except AttributeError but we can just pass that.
     except AttributeError:
         pass
@@ -348,13 +347,11 @@ def classifying(network_path: str,
     # Get the network information from given network_path information
     if network_path is not None and os.path.exists(network_path):
         network_name = network_path.split('/')[-1]
+        # Split network name and get the backbone and retrain_mode information from given network_path
+        backbone = str(network_name.split('-')[0])
+        resnet_retrain_mode = str(network_name.split('-')[1])
+        # Give all necessary inputs that are needed to compute webcam_capture method
+        webcam_capture(backbone, resnet_retrain_mode, device, network_path)
     else:
-        # Get the some pretrained models from models folder
-        network_path = 'models/ResNet-not_retrain-2classes-64-60-0.001.pth'
-        network_name = network_path.split('/')[-1]
-    # Split network name and get the backbone and retrain_mode information from given network_path
-    backbone = str(network_name.split('-')[0])
-    resnet_retrain_mode = str(network_name.split('-')[1])
-    # Give all necessary inputs that are needed to compute webcam_capture method
-    webcam_capture(backbone, resnet_retrain_mode, device, network_path)
+        raise ValueError('Invalid network path is given')
     return

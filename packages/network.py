@@ -102,7 +102,7 @@ class CNNClassifier(nn.Module):
             # Designed BasicCNN is used
             self.net = nn.Sequential(
                 # [batch_size, 3, 256, 256] -> Input with 256*256 RGB Image
-                nn.Conv2d(in_channels=3, out_channels=64, kernel_size=5, stride=1, padding=1),
+                nn.Conv2d(in_channels=3, out_channels=64, kernel_size=5, stride=1, padding=0),
                 # [batch_size, 64, 252, 252] -> Result of first convolutional layer
                 nn.ReLU(inplace=True),
                 # [batch_size, 64, 252, 252] -> Result of first ReLU activation function
