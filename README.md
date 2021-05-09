@@ -95,13 +95,14 @@ The dataset is collected from friends and family members. However, the dataset s
 │   ├── ResNet-retrain-2classes-64-60-0.00100000.png
 │   ├── ResNet-retrain-3classes-64-60-0.00010000.png
 │   ├── ResNet-retrain-3classes-64-60-0.00100000.png
-├── __init__.py
-├── face_mask_detector.py
-├── haarcascade_frontalface_default.xml
 ├── LICENSE
 ├── README.md
-├── requirements.txt
 ├── Terminal Command Run Examples.txt
+├── __init__.py
+├── face_mask_detector.py
+├── facemaskdetector_slides.pdf
+├── haarcascade_frontalface_default.xml
+├── requirements.txt
 ```
 
 ---
