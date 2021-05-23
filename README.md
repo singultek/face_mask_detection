@@ -363,7 +363,7 @@ When the results are examined, 2 main outcome can be seen. First observation one
 ---
 ### About Author
 
-I'm Sinan Gültekin, a master student on Computer and Automation Engineering at University of Siena. 
+I'm Sinan Gültekin, a master student in Computer and Automation Engineering at the University of Siena. 
 
 For any suggestions or questions, you can contact me via <singultek@gmail.com>
 
