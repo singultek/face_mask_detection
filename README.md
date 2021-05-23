@@ -111,7 +111,9 @@ The dataset is collected from friends and family members. However, the dataset s
 The project can be divided into 2 main parts.
 * Training the Network
 * Classifying the Webcam Image
+
 In order to compile the code, [face_mask_detector](https://github.com/singultek/face_mask_detection/blob/main/face_mask_detector.py) main method should be used. For detailed usage options, please check the usage examples part. face_mask_detector imports [packages.utils](https://github.com/singultek/face_mask_detection/blob/main/packages/utils.py), thus it can parse the command line arguments and call the proper method from packages.utils (Ex. face_mask_detector can call packages.utils.training if the train working mode is selected). 
+
 ---
 
 ### Training the Network
