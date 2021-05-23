@@ -321,20 +321,20 @@ One example of usage of evaluate mode:
 
 ## Discussion of Results
 
-| model                                              | training acc. | validation acc. |   test acc.   |
-|----------------------------------------------------|---------------|-----------------|---------------|
-| ResNet-not_retrain-2classes-64-60-0.00100000.pth   |   96.04       |     100.00      |     98.00     |
-| ResNet-not_retrain-2classes-64-60-0.00010000.pth   |   94.49       |     100.00      |     95.00     |
-| ResNet-retrain-2classes-64-60-0.00100000.pth       |   98.90       |      98.96      |     95.00     |
-| ResNet-retrain-2classes-64-60-0.00010000.pth       |   97.80       |     100.00      |     99.00     |
-| BasicCNN-not_retrain-2classes-64-60-0.00100000.pth |   79.52       |      98.88      |     73.00     |
-| BasicCNN-not_retrain-2classes-64-60-0.00010000.pth |   82.60       |      95.83      |     74.00     |
-| ResNet-not_retrain-3classes-64-60-0.00100000.pth   |   91.67       |      84.62      |     84.28     |
-| ResNet-not_retrain-3classes-64-60-0.00010000.pth   |   89.07       |      80.77      |     76.73     |
-| ResNet-retrain-3classes-64-60-0.00100000.pth       |   85.52       |      83.33      |     77.99     |
-| ResNet-retrain-3classes-64-60-0.00010000.pth       |   97.27       |      95.51      |     82.39     |
-| BasicCNN-not_retrain-3classes-64-60-0.00100000.pth |   89.62       |      75.00      |     67.30     |
-| BasicCNN-not_retrain-3classes-64-60-0.00010000.pth |   78.01       |      71.15      |     62.89     |
+| model                                                | training acc. | validation acc. |   test acc.   |
+|------------------------------------------------------|---------------|-----------------|---------------|
+| **ResNet-not_retrain-2classes-64-60-0.00100000.pth** |   96.04       |     100.00      |   **98.00**   |
+| ResNet-not_retrain-2classes-64-60-0.00010000.pth     |   94.49       |     100.00      |     95.00     |
+| ResNet-retrain-2classes-64-60-0.00100000.pth         |   98.90       |      98.96      |     95.00     |
+| **ResNet-retrain-2classes-64-60-0.00010000.pth**     |   97.80       |     100.00      |   **99.00**   |
+| BasicCNN-not_retrain-2classes-64-60-0.00100000.pth   |   79.52       |      98.88      |     73.00     |
+| BasicCNN-not_retrain-2classes-64-60-0.00010000.pth   |   82.60       |      95.83      |     74.00     |
+| **ResNet-not_retrain-3classes-64-60-0.00100000.pth** |   91.67       |      84.62      |   **84.28**   |
+| ResNet-not_retrain-3classes-64-60-0.00010000.pth     |   89.07       |      80.77      |     76.73     |
+| ResNet-retrain-3classes-64-60-0.00100000.pth         |   85.52       |      83.33      |     77.99     |
+| **ResNet-retrain-3classes-64-60-0.00010000.pth**     |   97.27       |      95.51      |   **82.39**   |
+| BasicCNN-not_retrain-3classes-64-60-0.00100000.pth   |   89.62       |      75.00      |     67.30     |
+| BasicCNN-not_retrain-3classes-64-60-0.00010000.pth   |   78.01       |      71.15      |     62.89     |
 
 ```
 >Model Name Explanation:        ResNet -> backbone  
