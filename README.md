@@ -8,9 +8,9 @@ The main goal of the project is building a CNN model from scratch and implementi
 **Table of Contents**
 
 * [Brief Introduction](#brief-introduction)
-* [Directory structure](#directory-structure)
-* [Explaination of project](#explaination-of-project)
-* [Usage examples](#usage-examples)
+* [Directory Structure](#directory-structure)
+* [Explaination of Project](#explaination-of-project)
+* [Usage Examples](#usage-examples)
 * [Discussion of Results](#discussion-of-results)
 * [About Author](#about-author)
 
@@ -43,7 +43,7 @@ The dataset of the project cannot be shared on github due to privacy issues. The
 The dataset is collected from friends and family members. However, the dataset structure is showed on the directory structure part. In order to evaluate the performance of third(wrong_mask) class, several test runs completed with and without third class. Due to the simplicity for saving the results of traning and classification results, there are two different dataset directory for 2 and 3 classes cases.
 
 ---
-## Directory structure
+## Directory Structure
 ```
 .
 ├── dataset_2_classes
@@ -106,7 +106,7 @@ The dataset is collected from friends and family members. However, the dataset s
 ```
 
 ---
-## Explaination of project
+## Explaination of Project
 
 The project can be divided into 2 main parts.
 * Training the Network
@@ -208,7 +208,7 @@ In this step, the classification process on the input webcam image will be perfo
   * Calls the webcam_capture, which takes care of organization of the webcam capture and network classification over captured image
 
 ---
-## Usage examples
+## Usage Examples
 
 The main [face_mask_detector](https://github.com/singultek/face_mask_detection/blob/main/face_mask_detector.py) code can run in three working modes: training, evaluating, classifying. Following help commands and usage examples can be followed to run the code from command line:
 
@@ -319,7 +319,7 @@ One example of usage of evaluate mode:
 
 ---
 
-### Discussion of Results
+## Discussion of Results
 
 | model                                              | training acc. | validation acc. |   test acc.   |
 |----------------------------------------------------|---------------|-----------------|---------------|
@@ -363,7 +363,7 @@ When the results are examined, 2 main outcome can be seen. First observation one
 ![ResNet-retrain-3classes-64-60-0.00010000](https://github.com/singultek/face_mask_detection/blob/main/demo_gifs/ResNet-retrain-3classes-64-60-0.00010000.gif)
 
 ---
-### About Author
+## About Author
 
 I'm Sinan Gültekin, a master student in Computer and Automation Engineering at the University of Siena. 
 
